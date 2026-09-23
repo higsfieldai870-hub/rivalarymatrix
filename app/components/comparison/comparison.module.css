@@ -24,7 +24,7 @@
   border: 1px solid var(--border);
   border-radius: 50px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
   margin-bottom: 20px;
 }
@@ -76,7 +76,7 @@
   border: 1px solid var(--border);
   padding: 10px 17px;
   border-radius: 6px;
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
   cursor: pointer;
@@ -189,7 +189,7 @@
 
 .playerRole {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   margin-bottom: 6px;
 }
@@ -215,7 +215,7 @@
   gap: 22px;
   margin-top: 15px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .playerDetails strong {
@@ -249,7 +249,7 @@
 .vsCenter span {
   margin-top: 12px;
   color: var(--muted);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -283,7 +283,7 @@
 
 .sectionLabel {
   color: var(--green);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
   margin-bottom: 8px;
@@ -304,7 +304,7 @@
 .sectionDescription {
   max-width: 350px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -356,7 +356,7 @@
   border-left: 1px solid var(--border);
   border-right: 1px solid var(--border);
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   text-align: center;
@@ -462,7 +462,7 @@
 }
 
 .chartMeta {
-  font-size: 9px;
+  font-size: 12px;
   color: var(--muted);
   letter-spacing: 2px;
   text-align: right;
@@ -495,7 +495,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 18px;
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .profileDot {
@@ -514,7 +514,7 @@
 
 .profileSide p {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
   margin-top: 30px;
 }
@@ -557,7 +557,7 @@
 
 .metricValue span {
   color: var(--muted2);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   font-weight: 600;
 }
@@ -582,7 +582,7 @@
 .metricTitle {
   text-align: center;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   margin-bottom: 11px;
@@ -629,7 +629,7 @@
   justify-content: space-between;
   margin-top: 7px;
   min-height: 10px;
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.5px;
 }
@@ -680,7 +680,7 @@
 
 .per90Header span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -717,7 +717,7 @@
 
 .per90StatHead span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -772,7 +772,7 @@
 
 .seasonTitle span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -786,7 +786,7 @@
 .seasonHead {
   padding: 12px 20px;
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 1px;
   background: rgba(255, 255, 255, 0.02);
 }
@@ -795,7 +795,7 @@
   min-height: 72px;
   padding: 10px 20px;
   border-top: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .seasonPlayer strong {
@@ -815,7 +815,7 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .leftRow .seasonPlayerName b {
@@ -888,7 +888,7 @@
 
 .trophyPlayerHeader span {
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -935,7 +935,7 @@
 .trophyItem span {
   display: block;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.7px;
 }
@@ -962,7 +962,7 @@
 .trophyVs span {
   margin-top: 10px;
   color: var(--muted);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -1081,7 +1081,7 @@
     margin-bottom: 3px;
     color: var(--muted2);
     font-family: var(--font-body);
-    font-size: 7px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
   }
@@ -1167,7 +1167,7 @@
 
   .careerStat,
   .careerCenter {
-    font-size: 6px;
+    font-size: 12px;
     letter-spacing: 1px;
   }
 
@@ -1188,11 +1188,11 @@
   }
 
   .metricValue span {
-    font-size: 6px;
+    font-size: 12px;
   }
 
   .metricTitle {
-    font-size: 7px;
+    font-size: 12px;
     letter-spacing: 1px;
   }
 
@@ -1201,7 +1201,7 @@
   }
 
   .comparisonPercent {
-    font-size: 6px;
+    font-size: 12px;
   }
 
   /* CHARTS */

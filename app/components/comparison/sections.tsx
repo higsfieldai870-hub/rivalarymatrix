@@ -188,6 +188,7 @@ function availability(d: PlayerDossier) {
 const euros = (value: Num) => (value === null ? "–" : `€${formatCompact(value)}`);
 
 export function Bio({ players, names }: { players: Pair; names: [string, string] }) {
+  const [open, setOpen] = useState(false);
   const allRows: { label: string; value: (d: PlayerDossier) => ReactNode }[] = [
     {
       label: "FULL NAME",
@@ -227,6 +228,7 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
   ];
   // Hide rows the provider has no data for on either side.
   const rows = allRows.filter((row) => players.some((d) => row.value(d) !== "–"));
+  const shown = open ? rows : rows.slice(0, 5);
 
   return (
     <Section id="bio">
@@ -242,7 +244,7 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
           <div className={`${styles.careerPlayer} ${styles.right}`}>{upper(names[1])}</div>
         </div>
 
-        {rows.map((row) => (
+        {shown.map((row) => (
           <div key={row.label} className={`${styles.careerRow} ${api.bioRow}`}>
             <div className={api.bioValue}>{row.value(players[0])}</div>
             <div className={styles.careerStat}>{row.label}</div>
@@ -250,6 +252,7 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
           </div>
         ))}
       </div>
+      <ShowAll total={rows.length} shown={5} open={open} onToggle={() => setOpen((v) => !v)} noun="rows" />
     </Section>
   );
 }
@@ -258,14 +261,30 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
 // Scope-driven sections
 // ---------------------------------------------------------------------------
 
+// Seasons in this scope that carry matches for one player.
+function seasonsOnRecord(view: ComparisonViewModel, side: Side) {
+  return view.seasons.filter((s) => s[side] !== null).map((s) => s.season);
+}
+
 // First season in this scope with matches on record, and the player's age
 // then, so a career that began before the data does is easy to spot.
 function recordsFrom(view: ComparisonViewModel, dossier: PlayerDossier, side: Side) {
-  const seasons = view.seasons.filter((s) => s[side] !== null).map((s) => s.season);
+  const seasons = seasonsOnRecord(view, side);
   if (!seasons.length) return "—";
   const first = Math.min(...seasons);
   const born = Number(dossier.profile.birthDate?.slice(0, 4));
   return born ? `${seasonLabel(first)} · age ${first - born}` : seasonLabel(first);
+}
+
+// The window the numbers actually cover, so a partial range is obvious next
+// to the totals instead of only in the small print at the foot of the page.
+function onRecord(view: ComparisonViewModel, side: Side) {
+  const seasons = seasonsOnRecord(view, side);
+  if (!seasons.length) return "No seasons on record";
+  const first = Math.min(...seasons);
+  const last = Math.max(...seasons);
+  const span = first === last ? seasonLabel(first) : `${seasonLabel(first)}–${seasonLabel(last)}`;
+  return `${seasons.length} season${seasons.length === 1 ? "" : "s"} · ${span}`;
 }
 
 export function CareerCard({
@@ -288,15 +307,16 @@ export function CareerCard({
   return (
     <section id="career" className={`${styles.careerSection} ${api.anchor}`}>
       <div className={styles.container}>
-        <SectionHeader label={`${upper(scopeLabel)} DATA`} title="Career Stats">
-          Every match on record in this scope. Seasons the data has no matches for
-          are missing, so totals can sit below official career figures.
+        <SectionHeader label={`${upper(scopeLabel)} DATA`} title="Career Stats On Record">
+          Every match BSD holds in this scope, summed. BSD&apos;s player data starts
+          with 2011/12, so seasons before that are missing and these totals are
+          floors, not official career records.
         </SectionHeader>
 
         <div className={styles.careerCard} data-reveal>
           <div className={styles.careerTop}>
             <div className={`${styles.careerPlayer} ${styles.left}`}>{upper(view.names[0])}</div>
-            <div className={styles.careerCenter}>{upper(scopeLabel)}</div>
+            <div className={styles.careerCenter}>{upper(scopeLabel)} ON RECORD</div>
             <div className={`${styles.careerPlayer} ${styles.right}`}>{upper(view.names[1])}</div>
           </div>
 
@@ -316,12 +336,26 @@ export function CareerCard({
             <div className={`${styles.careerNumber} ${styles.left}`}>
               {recordsFrom(view, players[0], "left")}
             </div>
-            <div className={styles.careerStat}>RECORDS FROM</div>
+            <div className={styles.careerStat}>ON RECORD FROM</div>
             <div className={`${styles.careerNumber} ${styles.right}`}>
               {recordsFrom(view, players[1], "right")}
             </div>
           </div>
+
+          <div className={`${styles.careerRow} ${api.recordsRow}`}>
+            <div className={`${styles.careerNumber} ${styles.left}`}>{onRecord(view, "left")}</div>
+            <div className={styles.careerStat}>SEASONS COVERED</div>
+            <div className={`${styles.careerNumber} ${styles.right}`}>{onRecord(view, "right")}</div>
+          </div>
         </div>
+
+        <p className={api.coverage}>
+          <span className={api.coverageIcon} aria-hidden>
+            i
+          </span>
+          BSD has no per-match data before 2011/12, so earlier seasons are missing and these totals
+          are floors, not official career figures.
+        </p>
       </div>
     </section>
   );
@@ -459,6 +493,17 @@ export function Analytics({ view }: { view: ComparisonViewModel }) {
 }
 
 export function StatBattle({ view }: { view: ComparisonViewModel }) {
+  const [open, setOpen] = useState(false);
+  const total = view.metrics.reduce((n, group) => n + group.rows.length, 0);
+  // Cap the metric rows across groups, dropping groups left empty.
+  const limit = open ? total : 5;
+  const groups = view.metrics
+    .map((group, i) => {
+      const before = view.metrics.slice(0, i).reduce((n, g) => n + g.rows.length, 0);
+      return { ...group, rows: group.rows.slice(0, Math.max(0, limit - before)) };
+    })
+    .filter((group) => group.rows.length > 0);
+
   return (
     <Section id="stat-battle">
       <SectionHeader label="STAT BATTLE" title="Every Metric">
@@ -467,7 +512,7 @@ export function StatBattle({ view }: { view: ComparisonViewModel }) {
       </SectionHeader>
 
       <div className={styles.metrics} data-reveal>
-        {view.metrics.map((group) => (
+        {groups.map((group) => (
           <div key={group.category}>
             <div className={api.category}>{group.category}</div>
             {group.rows.map(({ def, left, right }) => {
@@ -506,6 +551,7 @@ export function StatBattle({ view }: { view: ComparisonViewModel }) {
           </div>
         ))}
       </div>
+      <ShowAll total={total} shown={5} open={open} onToggle={() => setOpen((v) => !v)} noun="metrics" />
     </Section>
   );
 }
@@ -1046,28 +1092,34 @@ export function ScoutingReport({ players, names }: { players: Pair; names: [stri
 }
 
 function MediaColumn({ dossier, side }: { dossier: PlayerDossier; side: Side }) {
+  const [open, setOpen] = useState(false);
   const items = dossier.media ?? [];
+  const shown = open ? items : items.slice(0, 5);
+
   return (
-    <PlayerColumn dossier={dossier} side={side} kicker={`${items.length} LATEST ITEMS`}>
-      {items.length === 0 && <div className={api.emptyList}>No recent videos or posts.</div>}
-      {items.map((item) => (
-        <a
-          key={item.url}
-          className={`${api.listItem} ${api.mediaItem}`}
-          href={item.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span className={api.mediaType}>{item.type === "video" ? "▶" : "✦"}</span>
-          <div className={api.listMain}>
-            <span className={api.listTitle}>{item.title || "Untitled"}</span>
-            <span className={api.listMeta}>
-              {[item.type, item.account, formatDate(item.publishedAt)].filter(Boolean).join(" • ")}
-            </span>
-          </div>
-        </a>
-      ))}
-    </PlayerColumn>
+    <div>
+      <PlayerColumn dossier={dossier} side={side} kicker={`${items.length} LATEST ITEMS`}>
+        {items.length === 0 && <div className={api.emptyList}>No recent videos or posts.</div>}
+        {shown.map((item) => (
+          <a
+            key={item.url}
+            className={`${api.listItem} ${api.mediaItem}`}
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span className={api.mediaType}>{item.type === "video" ? "▶" : "✦"}</span>
+            <div className={api.listMain}>
+              <span className={api.listTitle}>{item.title || "Untitled"}</span>
+              <span className={api.listMeta}>
+                {[item.type, item.account, formatDate(item.publishedAt)].filter(Boolean).join(" • ")}
+              </span>
+            </div>
+          </a>
+        ))}
+      </PlayerColumn>
+      <ShowAll total={items.length} shown={5} open={open} onToggle={() => setOpen((v) => !v)} noun="items" />
+    </div>
   );
 }
 

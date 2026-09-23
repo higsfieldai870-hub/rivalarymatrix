@@ -581,6 +581,17 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
   );
   const statLines = lines.filter((l): l is StatLine => l !== null);
 
+  // A career row whose season the API cannot name would otherwise vanish from
+  // the totals without a trace, so say so instead of showing a lower number.
+  const dropped = rows.length - statLines.length;
+  const warnings = dropped
+    ? [
+        `${dropped} career row${dropped === 1 ? "" : "s"} could not be matched to a season, so ${
+          dropped === 1 ? "it is" : "they are"
+        } not counted in any total.`,
+      ]
+    : [];
+
   // Clubs from the career rows (with seasons) and transfer history.
   const clubs = new Map<number, Club & { years: Set<number> }>();
   const addClub = (team: TeamRef, national: boolean, year?: number) => {
@@ -617,7 +628,7 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
     transfers: transfers ? mappedTransfers.sort((a, b) => b.date.localeCompare(a.date)) : null,
     injuries: null,
     media: media ? media.map(toMedia) : null,
-    warnings: [],
+    warnings,
   };
 }
 

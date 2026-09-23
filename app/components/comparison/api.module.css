@@ -59,7 +59,7 @@
   border-radius: 14px;
   background: rgba(245, 200, 75, 0.06);
   color: var(--white);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -71,7 +71,7 @@
   display: block;
   margin-bottom: 2px;
   color: var(--gold);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -80,7 +80,7 @@
   padding: 1px 6px;
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.08);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .noticeError {
@@ -107,9 +107,32 @@
   padding: 10px 0 40px;
 }
 
+/* Career card: the window the totals actually cover. */
 .coverage {
-  max-width: 900px;
-  margin: -15px auto 30px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 10px;
+  max-width: 760px;
+  margin: 22px auto 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.coverageIcon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  font-size: 12px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* =========================================================
@@ -121,7 +144,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 30px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
   color: var(--white);
@@ -162,7 +185,7 @@
   padding: 26px 20px 12px;
   border-bottom: 1px solid var(--border);
   color: var(--green);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -216,7 +239,7 @@
 
 .listTitle {
   display: block;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   line-height: 1.35;
 }
@@ -225,7 +248,7 @@
   display: block;
   margin-top: 3px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.6px;
   line-height: 1.5;
   text-transform: uppercase;
@@ -254,7 +277,7 @@
 
 .listStats span {
   color: var(--muted2);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.5px;
 }
@@ -274,7 +297,7 @@
   border-bottom: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
 }
@@ -282,7 +305,7 @@
 .emptyList {
   padding: 24px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.7;
 }
 
@@ -298,7 +321,7 @@
   border: 1px solid rgba(184, 255, 0, 0.3);
   border-radius: 50px;
   color: var(--green);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -352,7 +375,7 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -393,7 +416,7 @@
 
 .summary span {
   color: var(--muted2);
-  font-size: 7px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.5px;
 }
@@ -408,7 +431,7 @@
   padding: 24px 26px;
   background: rgba(255, 255, 255, 0.02);
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.8;
 }
 
@@ -465,7 +488,7 @@
 
 .pickerVs span {
   color: var(--muted);
-  font-size: 7px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -475,7 +498,7 @@
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1px;
   cursor: pointer;
@@ -514,7 +537,7 @@
 
 .pickerLabel {
   color: var(--accent);
-  font-size: 8px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 3px;
   margin-bottom: 14px;
@@ -567,7 +590,7 @@
 .selectedMeta {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
@@ -601,7 +624,7 @@
   min-height: 16px;
   margin-top: 8px;
   color: var(--muted2);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.5px;
 }
 
@@ -657,7 +680,7 @@
   display: block;
   margin-top: 2px;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.5px;
 }
 
@@ -679,7 +702,7 @@
   border-radius: 8px;
   background: var(--green);
   color: #000;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -702,7 +725,7 @@
 .compareHint {
   min-height: 1.6em;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.5px;
 }
 
@@ -727,7 +750,7 @@
 .quickPicks span {
   align-self: center;
   color: var(--muted2);
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 2px;
 }
 
@@ -737,7 +760,7 @@
   border-radius: 50px;
   background: rgba(255, 255, 255, 0.025);
   color: var(--muted);
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -783,7 +806,7 @@
   gap: 12px;
   margin-bottom: 22px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
   text-align: center;
 }
@@ -873,7 +896,7 @@
 
   .bioValue {
     padding: 0 16px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .listItem {
