@@ -1,10 +1,21 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import PickerRow from "@/app/components/comparison/PickerRow";
 import FeatureArt, { type ArtKind } from "@/app/components/home/FeatureArt";
 import { hasApiKey } from "@/lib/bsd/client";
 import { metricDefs, scopes } from "@/lib/player-stats";
+import { openGraph } from "@/lib/site";
 import styles from "./page.module.css";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: openGraph(
+    "/",
+    "Rivalry Matrix — Football Head-to-Head Comparisons",
+    "Put any two footballers side by side: goals, assists, xG, ratings, scouting reports, contracts and transfers, all from live data.",
+  ),
+};
 
 // BSD player photos (by id) and comparison links (by name).
 const photo = (id: number) => `https://sports.bzzoiro.com/img/player/${id}/?sor=true`;
@@ -14,52 +25,54 @@ type Rivalry = {
   badge: string;
   title: string;
   text: string;
-  photos: [string, string];
+  // null: an open "pick your own" card with mystery portraits.
+  photos: [string, string] | null;
 };
 
-const featured: Rivalry = {
-  href: "/compare/lionel-messi-vs-cristiano-ronaldo",
-  badge: "THE GREATEST RIVALRY",
-  title: "Messi vs Ronaldo",
-  text: "Two decades of goals, assists, xG and ratings, compared season by season, club by club.",
-  photos: [photo(9063), photo(7880)],
-};
+const featured = {
+  href: "/compare/erling-haaland-vs-kylian-mbappe",
+  badge: "THE NEXT ERA",
+  title: "Haaland vs Mbappé",
+  text: "Power against pace: the two defining forwards of their generation, compared season by season, club by club.",
+  photos: [photo(852), photo(594)],
+} satisfies Rivalry;
 
 const rivalries: Rivalry[] = [
   {
-    href: "/compare/erling-haaland-vs-kylian-mbappe",
-    badge: "THE NEXT ERA",
-    title: "Haaland vs Mbappé",
-    text: "Power against pace: the two defining forwards of their generation.",
-    photos: [photo(852), photo(594)],
+    href: "/compare/pedri-vs-jude-bellingham",
+    badge: "MIDFIELD MAESTROS",
+    title: "Pedri vs Bellingham",
+    text: "Barcelona's metronome against Madrid's box-crashing midfielder.",
+    photos: [photo(744), photo(592)],
   },
   {
-    href: "/compare/lamine-yamal-vs-jamal-musiala",
-    badge: "THE WONDERKIDS",
-    title: "Yamal vs Musiala",
-    text: "Europe's brightest young creators, dribble for dribble.",
-    photos: [photo(745), photo(8564)],
+    href: "/compare/lamine-yamal-vs-michael-olise",
+    badge: "LEFT-FOOTED WIZARDS",
+    title: "Yamal vs Olise",
+    text: "Two left-footers on the right wing, dribble for dribble.",
+    photos: [photo(745), photo(2467)],
   },
   {
-    href: "/compare/harry-kane-vs-robert-lewandowski",
-    badge: "THE NUMBER NINES",
-    title: "Kane vs Lewandowski",
-    text: "Two of the most complete centre-forwards of their era, goal for goal.",
-    photos: [photo(2466), photo(748)],
+    href: "/compare/lamine-yamal-vs-kylian-mbappe",
+    badge: "PRODIGY VS SUPERSTAR",
+    title: "Yamal vs Mbappé",
+    text: "The teenage sensation measured against an established superstar.",
+    photos: [photo(745), photo(594)],
   },
   {
-    href: "/compare/mohamed-salah-vs-bukayo-saka",
-    badge: "WIDE THREATS",
-    title: "Salah vs Saka",
-    text: "Right-sided forwards who cut inside and decide games.",
-    photos: [photo(333), photo(455)],
+    href: "/compare",
+    badge: "YOUR RIVALRY",
+    title: "Player 1 vs Player 2",
+    text: "Pick any two players and build your own head-to-head.",
+    photos: null,
   },
 ];
 
-const allRivalries = [featured, ...rivalries];
+// Real match-ups only; the open "pick your own" card is left out.
+const allRivalries = [featured, ...rivalries].filter((r) => r.photos);
 
 // Hero line-up: each left player faces their rival on the same row.
-const cast = allRivalries.slice(0, 3).map((r) => r.photos);
+const cast = allRivalries.slice(0, 3).map((r) => r.photos!);
 
 const steps = [
   {
@@ -190,11 +203,6 @@ export default function Home() {
             ))}
           </div>
 
-          <div className={styles.eyebrow}>
-            <i className={styles.eyebrowDot} />
-            FOOTBALL • HEAD-TO-HEAD • LIVE DATA
-          </div>
-
           <h1 className={styles.heroTitle}>
             Settle the <span>debate</span>
           </h1>
@@ -214,7 +222,7 @@ export default function Home() {
                   <Image key={src} src={src} alt="" width={60} height={60} sizes="26px" />
                 ))}
               </span>
-              Messi vs Ronaldo
+              {featured.title}
             </Link>
           </div>
 
@@ -232,7 +240,9 @@ export default function Home() {
       <div className={styles.tickerClip} aria-hidden>
         <div className={styles.ticker}>
           <div className={styles.tickerTrack}>
-            {[0, 1].map((copy) =>
+            {/* Two identical halves, each wider than any screen, so the
+                -50% loop never shows a gap. */}
+            {[0, 1, 2, 3, 4, 5].map((copy) =>
               allRivalries.map((r) => (
                 <span key={`${copy}-${r.href}`} className={styles.tickerItem}>
                   <RivalryTitle title={r.title} />
@@ -251,9 +261,6 @@ export default function Home() {
               <div className={styles.sectionLabel}>FEATURED RIVALRIES</div>
               <h2 className={styles.sectionTitle}>Start With A Classic</h2>
             </div>
-            <p className={styles.sectionDescription}>
-              Open a ready-made comparison, or build your own from any two players.
-            </p>
           </div>
 
           <div className={styles.rivalryGrid}>
@@ -281,9 +288,18 @@ export default function Home() {
               <div key={rivalry.href} data-reveal style={{ transitionDelay: `${(i + 1) * 70}ms` }}>
                 <Link href={rivalry.href} className={styles.rivalryCard}>
                   <div className={styles.rivalryFaces}>
-                    {rivalry.photos.map((src, side) => (
-                      <Portrait key={src} src={src} side={side} className={styles.miniPortrait} />
-                    ))}
+                    {rivalry.photos
+                      ? rivalry.photos.map((src, side) => (
+                          <Portrait key={src} src={src} side={side} className={styles.miniPortrait} />
+                        ))
+                      : [0, 1].map((side) => (
+                          <div
+                            key={side}
+                            className={`${styles.miniPortrait} ${styles.mysteryPortrait} ${side === 0 ? styles.ringLeft : styles.ringRight}`}
+                          >
+                            ?
+                          </div>
+                        ))}
                   </div>
                   <span className={styles.badge}>{rivalry.badge}</span>
                   <h3>

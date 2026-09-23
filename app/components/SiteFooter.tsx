@@ -4,6 +4,8 @@ import styles from "./site.module.css";
 const explore = [
   { href: "/", label: "Home" },
   { href: "/compare", label: "Compare Players" },
+  { href: "/rivalries", label: "Popular Rivalries" },
+  { href: "/live", label: "Watch Live Football" },
 ];
 
 export default function SiteFooter() {

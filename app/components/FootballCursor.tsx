@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
+import logo from "@/public/logo.png";
 import styles from "./site.module.css";
 
 const HOVER_TARGETS = "a, button, [data-cursor-hover]";
@@ -48,7 +50,9 @@ export default function FootballCursor() {
 
     const onOver = (event: PointerEvent) => {
       const target = event.target instanceof Element ? event.target : null;
-      ring.toggleAttribute("data-hover", Boolean(target?.closest(HOVER_TARGETS)));
+      const hover = Boolean(target?.closest(HOVER_TARGETS));
+      ring.toggleAttribute("data-hover", hover);
+      ball.toggleAttribute("data-hover", hover);
     };
 
     const onLeave = () => setVisible(false);
@@ -78,7 +82,7 @@ export default function FootballCursor() {
   return (
     <>
       <div ref={ballRef} className={styles.cursorBall} aria-hidden>
-        ⚽
+        <Image src={logo} alt="" width={30} height={30} priority />
       </div>
       <div ref={ringRef} className={styles.cursorRing} aria-hidden />
     </>

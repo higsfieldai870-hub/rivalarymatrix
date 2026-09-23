@@ -99,6 +99,18 @@
   color: var(--green);
 }
 
+.logoImage {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 10px rgba(184, 255, 0, 0.25));
+  transition: transform 0.4s;
+}
+
+.logo:hover .logoImage {
+  transform: rotate(-20deg);
+}
+
 .logoMark {
   margin-right: 10px;
   width: 8px;
@@ -291,15 +303,35 @@
 }
 
 .cursorBall {
-  width: 25px;
-  height: 25px;
+  width: 30px;
+  height: 30px;
   z-index: 99999;
-  display: grid;
-  place-items: center;
-  font-size: 22px;
-  line-height: 1;
   filter: drop-shadow(0 0 8px rgba(184, 255, 0, 0.5));
   transition: opacity 0.2s;
+}
+
+/* The logo ball; it spins while over something clickable. */
+.cursorBall img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s;
+}
+
+.cursorBall[data-hover] img {
+  animation: cursor-spin 1.2s linear infinite;
+}
+
+@keyframes cursor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursorBall[data-hover] img {
+    animation: none;
+  }
 }
 
 .cursorRing {
@@ -351,6 +383,12 @@
 
   .logo {
     font-size: 19px;
+  }
+
+  .logoImage {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
   }
 
   .navLink {

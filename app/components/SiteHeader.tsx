@@ -1,11 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import logo from "@/public/logo.png";
 import styles from "./site.module.css";
 
-const links = [{ href: "/compare", label: "Compare", more: " Players" }];
+const links = [
+  { href: "/compare", label: "Compare", more: " Players" },
+  { href: "/rivalries", label: "Rivalries", more: "" },
+  { href: "/live", label: "Watch", more: " Live" },
+];
 
 // Scroll distance that counts as a deliberate direction change, so small
 // trackpad jitters don't flicker the header.
@@ -66,7 +72,14 @@ export default function SiteHeader() {
     >
       <div className={styles.headerInner}>
         <Link href="/" className={styles.logo}>
-          <i className={styles.logoMark} aria-hidden />
+          <Image
+            src={logo}
+            alt=""
+            width={40}
+            height={40}
+            priority
+            className={styles.logoImage}
+          />
           RIVALRY<span>MATRIX</span>
         </Link>
 

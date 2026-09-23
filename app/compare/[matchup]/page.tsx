@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Suspense } from "react";
 import api from "@/app/components/comparison/api.module.css";
+import JsonLd from "@/app/components/JsonLd";
 import ApiComparison from "@/app/components/comparison/ApiComparison";
 import styles from "@/app/components/comparison/comparison.module.css";
 import {
@@ -14,18 +15,36 @@ import {
 import { displayName, shortName } from "@/app/components/comparison/view-model";
 import { hasApiKey } from "@/lib/bsd/client";
 import { resolveMatchup } from "@/lib/bsd/matchup";
+import { absoluteUrl, openGraph, SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
   params,
 }: PageProps<"/compare/[matchup]">): Promise<Metadata> {
   const { matchup } = await params;
   const result = hasApiKey() ? await resolveMatchup(matchup) : null;
-  if (result?.status !== "ok") return { title: "Player Comparison" };
+  // Errors, unknown names and bad URLs stay out of search results.
+  if (result?.status !== "ok" || result.left.id === result.right.id) {
+    return { title: "Player Comparison", robots: { index: false, follow: true } };
+  }
 
   const [left, right] = [displayName(result.left), displayName(result.right)];
+  const title = `${left} vs ${right}: Stats Comparison`;
+  const description = `${left} vs ${right} compared side by side with live data: goals, assists, xG, ratings, per-90 numbers, scouting reports, transfers and more.`;
+
   return {
-    title: `${left} vs ${right}`,
-    description: `${left} vs ${right} compared side by side with live data: goals, assists, xG, ratings, scouting reports, transfers and more.`,
+    title,
+    description,
+    keywords: [
+      `${left} vs ${right}`,
+      `${right} vs ${left}`,
+      `${left} vs ${right} stats`,
+      `${left} stats`,
+      `${right} stats`,
+      "player comparison",
+    ],
+    // The canonical order, even when this page was reached by another spelling.
+    alternates: { canonical: result.path },
+    openGraph: openGraph(result.path, title, description),
   };
 }
 
@@ -85,8 +104,38 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
     );
   }
 
+  const title = `${displayName(left)} vs ${displayName(right)}`;
+  const person = (p: typeof left) => ({
+    "@type": "Person",
+    name: displayName(p),
+    image: p.photo,
+    ...(p.nationality && { nationality: p.nationality }),
+    ...(p.currentTeam && { memberOf: { "@type": "SportsTeam", name: p.currentTeam } }),
+  });
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        url: absoluteUrl(result.path),
+        name: `${title}: Stats Comparison`,
+        isPartOf: { "@id": `${SITE_URL}/#website` },
+        about: [person(left), person(right)],
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+          { "@type": "ListItem", position: 2, name: "Compare", item: absoluteUrl("/compare") },
+          { "@type": "ListItem", position: 3, name: title, item: absoluteUrl(result.path) },
+        ],
+      },
+    ],
+  };
+
   return (
     <>
+      <JsonLd data={jsonLd} />
       <section className={`${styles.hero} ${api.matchupHero}`}>
         <div className={styles.container}>
           <div className={styles.eyebrow}>

@@ -5,11 +5,17 @@ import styles from "@/app/components/comparison/comparison.module.css";
 import { MissingKeyNotice } from "@/app/components/comparison/Notices";
 import PickerRow from "@/app/components/comparison/PickerRow";
 import { hasApiKey } from "@/lib/bsd/client";
+import { openGraph } from "@/lib/site";
+
+const title = "Compare Any Two Players";
+const description =
+  "Search any two footballers and compare their live stats side by side: goals, assists, xG, ratings, scouting reports, transfers and more.";
 
 export const metadata: Metadata = {
-  title: "Compare Any Two Players",
-  description:
-    "Search any two footballers and compare their live stats side by side: goals, assists, xG, ratings, scouting reports, transfers and more.",
+  title,
+  description,
+  alternates: { canonical: "/compare" },
+  openGraph: openGraph("/compare", title, description),
 };
 
 const quickPicks = [

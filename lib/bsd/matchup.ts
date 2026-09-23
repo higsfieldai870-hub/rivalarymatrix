@@ -24,7 +24,7 @@ export const findPlayerBySlug = cache(async (slug: string) => {
 });
 
 // Just the name when it leads back to this player, otherwise name and id.
-async function canonicalSide(player: PlayerProfile) {
+export async function canonicalSide(player: PlayerProfile) {
   const slug = playerSlug(player);
   const top = await findPlayerBySlug(slug);
   return sideSlug({ slug, id: top?.id === player.id ? null : player.id });
