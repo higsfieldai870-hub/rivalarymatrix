@@ -1,69 +1,386 @@
 import Image from "next/image";
+import Link from "next/link";
+import PickerRow from "@/app/components/comparison/PickerRow";
+import FeatureArt, { type ArtKind } from "@/app/components/home/FeatureArt";
+import { hasApiKey } from "@/lib/bsd/client";
+import { metricDefs, scopes } from "@/lib/player-stats";
+import styles from "./page.module.css";
+
+// BSD player photos (by id) and comparison links (by name).
+const photo = (id: number) => `https://sports.bzzoiro.com/img/player/${id}/?sor=true`;
+
+type Rivalry = {
+  href: string;
+  badge: string;
+  title: string;
+  text: string;
+  photos: [string, string];
+};
+
+const featured: Rivalry = {
+  href: "/compare/lionel-messi-vs-cristiano-ronaldo",
+  badge: "THE GREATEST RIVALRY",
+  title: "Messi vs Ronaldo",
+  text: "Two decades of goals, assists, xG and ratings, compared season by season, club by club.",
+  photos: [photo(9063), photo(7880)],
+};
+
+const rivalries: Rivalry[] = [
+  {
+    href: "/compare/erling-haaland-vs-kylian-mbappe",
+    badge: "THE NEXT ERA",
+    title: "Haaland vs Mbappé",
+    text: "Power against pace: the two defining forwards of their generation.",
+    photos: [photo(852), photo(594)],
+  },
+  {
+    href: "/compare/lamine-yamal-vs-jamal-musiala",
+    badge: "THE WONDERKIDS",
+    title: "Yamal vs Musiala",
+    text: "Europe's brightest young creators, dribble for dribble.",
+    photos: [photo(745), photo(8564)],
+  },
+  {
+    href: "/compare/harry-kane-vs-robert-lewandowski",
+    badge: "THE NUMBER NINES",
+    title: "Kane vs Lewandowski",
+    text: "Two of the most complete centre-forwards of their era, goal for goal.",
+    photos: [photo(2466), photo(748)],
+  },
+  {
+    href: "/compare/mohamed-salah-vs-bukayo-saka",
+    badge: "WIDE THREATS",
+    title: "Salah vs Saka",
+    text: "Right-sided forwards who cut inside and decide games.",
+    photos: [photo(333), photo(455)],
+  },
+];
+
+const allRivalries = [featured, ...rivalries];
+
+// Hero line-up: each left player faces their rival on the same row.
+const cast = allRivalries.slice(0, 3).map((r) => r.photos);
+
+const steps = [
+  {
+    title: "Type two names",
+    text: "Search any player by name, from global stars to lower-league squad players.",
+  },
+  {
+    title: "Open the comparison",
+    text: "Career, club and international numbers, charts, scouting and transfers on one page.",
+  },
+  {
+    title: "Share the link",
+    text: "Every comparison has its own address, so the argument can continue anywhere.",
+  },
+];
+
+type Feature = { id: string; title: string; text: string; art: ArtKind; wide?: boolean };
+
+const features: Feature[] = [
+  {
+    id: "stat-battle",
+    title: "Stat Battle",
+    text: `${metricDefs.length}+ metrics as head-to-head bars, from shots and duels to xG.`,
+    art: "battle",
+    wide: true,
+  },
+  {
+    id: "scouting",
+    title: "Scouting Report",
+    text: "Attribute scores, ability, potential, strengths and weaknesses.",
+    art: "radar",
+  },
+  {
+    id: "per-90",
+    title: "Per 90",
+    text: "Output normalised to a full match, so minutes played never skew it.",
+    art: "clock",
+  },
+  {
+    id: "analytics",
+    title: "Advanced Analytics",
+    text: "Season-by-season charts for goals, assists, ratings and workload.",
+    art: "chart",
+    wide: true,
+  },
+  {
+    id: "bio",
+    title: "Player File",
+    text: "Age, height, contract, market value, wage and international record.",
+    art: "number",
+  },
+  {
+    id: "career",
+    title: "Career Stats",
+    text: "Appearances, minutes, goals, assists and ratings in every scope.",
+    art: "number",
+  },
+  {
+    id: "seasons",
+    title: "Season By Season",
+    text: "Clubs, appearances, goals, assists and ratings for every season.",
+    art: "number",
+  },
+  {
+    id: "competitions",
+    title: "By Competition",
+    text: "Every league and cup each player has appeared in, most played first.",
+    art: "number",
+  },
+  {
+    id: "career-path",
+    title: "Career Path",
+    text: "Every club and every transfer, with fees where they were published.",
+    art: "path",
+    wide: true,
+  },
+];
+
+const heroStats = [
+  { value: `${metricDefs.length}+`, label: "METRICS" },
+  { value: scopes.length, label: "FILTERS" },
+  { value: features.length, label: "SECTIONS" },
+];
+
+function Portrait({ src, side, className }: { src: string; side: number; className: string }) {
+  return (
+    <div className={`${className} ${side === 0 ? styles.ringLeft : styles.ringRight}`}>
+      <Image src={src} alt="" width={300} height={300} sizes="180px" />
+    </div>
+  );
+}
+
+// "Messi vs Ronaldo" with the "vs" set apart.
+function RivalryTitle({ title }: { title: string }) {
+  const [left, right] = title.split(" vs ");
+  return (
+    <>
+      {left} <span>vs</span> {right}
+    </>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <>
+      <section className={styles.hero}>
+        <div className={styles.cast} aria-hidden>
+          {cast.map((pair, row) =>
+            pair.map((src, side) => (
+              <Portrait
+                key={src}
+                src={src}
+                side={side}
+                className={`${styles.face} ${styles[`row${row}`]} ${side === 0 ? styles.faceLeft : styles.faceRight}`}
+              />
+            )),
+          )}
+        </div>
+
+        <div className={styles.container}>
+          <div className={styles.castStrip} aria-hidden>
+            {[0, 1].map((side) => (
+              <div key={side} className={styles.stripGroup}>
+                {cast.map((pair) => (
+                  <Portrait key={pair[side]} src={pair[side]} side={side} className={styles.stripFace} />
+                ))}
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.eyebrow}>
+            <i className={styles.eyebrowDot} />
+            FOOTBALL • HEAD-TO-HEAD • LIVE DATA
+          </div>
+
+          <h1 className={styles.heroTitle}>
+            Settle the <span>debate</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className={styles.heroText}>
+            Put any two footballers side by side: goals, assists, xG, ratings, scouting reports,
+            contracts and transfers, all from live data.
           </p>
+
+          <div className={styles.heroActions}>
+            <Link href="/compare" className={styles.ctaPrimary}>
+              Compare players <span aria-hidden>→</span>
+            </Link>
+            <Link href={featured.href} className={styles.ctaGhost}>
+              <span className={styles.ctaFaces} aria-hidden>
+                {featured.photos.map((src) => (
+                  <Image key={src} src={src} alt="" width={60} height={60} sizes="26px" />
+                ))}
+              </span>
+              Messi vs Ronaldo
+            </Link>
+          </div>
+
+          <dl className={styles.heroStats}>
+            {heroStats.map((stat) => (
+              <div key={stat.label}>
+                <dt>{stat.label}</dt>
+                <dd>{stat.value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <div className={styles.tickerClip} aria-hidden>
+        <div className={styles.ticker}>
+          <div className={styles.tickerTrack}>
+            {[0, 1].map((copy) =>
+              allRivalries.map((r) => (
+                <span key={`${copy}-${r.href}`} className={styles.tickerItem}>
+                  <RivalryTitle title={r.title} />
+                  <b>⚽</b>
+                </span>
+              )),
+            )}
+          </div>
         </div>
-      </main>
-    </div>
+      </div>
+
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <div className={styles.sectionLabel}>FEATURED RIVALRIES</div>
+              <h2 className={styles.sectionTitle}>Start With A Classic</h2>
+            </div>
+            <p className={styles.sectionDescription}>
+              Open a ready-made comparison, or build your own from any two players.
+            </p>
+          </div>
+
+          <div className={styles.rivalryGrid}>
+            <div className={styles.featuredCell} data-reveal>
+              <Link href={featured.href} className={styles.featuredCard}>
+                <div className={styles.featuredFaces}>
+                  <Portrait src={featured.photos[0]} side={0} className={styles.bigPortrait} />
+                  <span className={styles.featuredVs} aria-hidden>
+                    VS
+                  </span>
+                  <Portrait src={featured.photos[1]} side={1} className={styles.bigPortrait} />
+                </div>
+                <span className={styles.badge}>{featured.badge}</span>
+                <h3>
+                  <RivalryTitle title={featured.title} />
+                </h3>
+                <p>{featured.text}</p>
+                <span className={styles.more}>
+                  OPEN COMPARISON <span aria-hidden>→</span>
+                </span>
+              </Link>
+            </div>
+
+            {rivalries.map((rivalry, i) => (
+              <div key={rivalry.href} data-reveal style={{ transitionDelay: `${(i + 1) * 70}ms` }}>
+                <Link href={rivalry.href} className={styles.rivalryCard}>
+                  <div className={styles.rivalryFaces}>
+                    {rivalry.photos.map((src, side) => (
+                      <Portrait key={src} src={src} side={side} className={styles.miniPortrait} />
+                    ))}
+                  </div>
+                  <span className={styles.badge}>{rivalry.badge}</span>
+                  <h3>
+                    <RivalryTitle title={rivalry.title} />
+                  </h3>
+                  <p>{rivalry.text}</p>
+                  <span className={styles.more}>
+                    OPEN <span aria-hidden>→</span>
+                  </span>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <div className={styles.sectionLabel}>HOW IT WORKS</div>
+              <h2 className={styles.sectionTitle}>Two Names, One Verdict</h2>
+            </div>
+          </div>
+
+          <ol className={styles.steps}>
+            {steps.map((step, i) => (
+              <li
+                key={step.title}
+                className={styles.step}
+                data-reveal
+                style={{ transitionDelay: `${i * 80}ms` }}
+              >
+                <span className={styles.stepNum}>{String(i + 1).padStart(2, "0")}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+                {i === steps.length - 1 && (
+                  <code className={styles.urlChip}>/compare/erling-haaland-vs-kylian-mbappe</code>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <div className={styles.sectionLabel}>INSIDE EVERY COMPARISON</div>
+              <h2 className={styles.sectionTitle}>Every Way To Settle It</h2>
+            </div>
+            <p className={styles.sectionDescription}>
+              Every comparison has the same sections, so it is always like for like, and the stat
+              sections all follow the Career, Club, International and season filters.
+            </p>
+          </div>
+
+          <div className={styles.bento}>
+            {features.map((feature, i) => (
+              <div
+                key={feature.id}
+                className={feature.wide ? styles.wide : undefined}
+                data-reveal
+                style={{ transitionDelay: `${(i % 3) * 70}ms` }}
+              >
+                <Link href={`${featured.href}#${feature.id}`} className={styles.tile}>
+                  <div className={styles.tileArt} aria-hidden>
+                    <FeatureArt kind={feature.art} index={i + 1} />
+                  </div>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.text}</p>
+                  <span className={styles.more}>
+                    SEE AN EXAMPLE <span aria-hidden>→</span>
+                  </span>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.container}>
+        <div className={styles.closing} data-reveal>
+          <h2>
+            Pick a <span>side</span>
+          </h2>
+          <p>Type two names and every number you need to argue it out is one click away.</p>
+          {hasApiKey() ? (
+            <PickerRow />
+          ) : (
+            <Link href="/compare" className={styles.ctaPrimary}>
+              Compare players <span aria-hidden>→</span>
+            </Link>
+          )}
+        </div>
+      </section>
+    </>
   );
 }

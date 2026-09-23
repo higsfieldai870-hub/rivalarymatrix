@@ -1,0 +1,198 @@
+/* Feature tile previews on the home page. Left is green, right is blue. */
+
+/* Stat battle: bars grow out from the centre label. */
+
+.battle {
+  display: grid;
+  gap: 11px;
+  width: 100%;
+  padding: 0 24px;
+}
+
+.battleRow {
+  display: grid;
+  grid-template-columns: 1fr 78px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.battleRow em {
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-align: center;
+}
+
+.barLeft,
+.barRight {
+  display: flex;
+  height: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.barLeft {
+  justify-content: flex-end;
+}
+
+.barLeft .fill {
+  background: linear-gradient(90deg, rgba(184, 255, 0, 0.4), var(--green));
+  transform-origin: right;
+}
+
+.barRight .fill {
+  background: linear-gradient(90deg, var(--blue), rgba(77, 157, 255, 0.4));
+  transform-origin: left;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  transition: transform 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s;
+}
+
+:global(.reveal-ready) [data-reveal]:not([data-visible]) .fill {
+  transform: scaleX(0);
+}
+
+/* Scouting radar */
+
+.radar {
+  width: 150px;
+  height: 150px;
+}
+
+.grid {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+.shapeLeft,
+.shapeRight {
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.shapeLeft {
+  fill: rgba(184, 255, 0, 0.16);
+  stroke: var(--green);
+}
+
+.shapeRight {
+  fill: rgba(77, 157, 255, 0.14);
+  stroke: var(--blue);
+}
+
+/* Per 90: a match clock split between the two players. */
+
+.clock {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 118px;
+  aspect-ratio: 1;
+}
+
+.clock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--green) 0 50%, var(--blue) 50% 100%);
+  mask: radial-gradient(circle, transparent 60%, #000 61%);
+}
+
+.clock span {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+}
+
+/* Advanced analytics: two season-by-season lines. */
+
+.chart {
+  width: 100%;
+  height: 120px;
+  padding: 0 20px;
+  overflow: visible;
+}
+
+.areaLeft {
+  fill: rgba(184, 255, 0, 0.08);
+}
+
+.lineLeft,
+.lineRight {
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.lineLeft {
+  stroke: var(--green);
+}
+
+.lineRight {
+  stroke: var(--blue);
+}
+
+/* Career path: two careers, one dot per club. */
+
+.path {
+  display: grid;
+  gap: 38px;
+  width: 100%;
+  padding: 0 34px;
+}
+
+.track {
+  position: relative;
+  height: 2px;
+  background: currentColor;
+}
+
+.trackLeft {
+  color: rgba(184, 255, 0, 0.5);
+}
+
+.trackRight {
+  color: rgba(77, 157, 255, 0.5);
+}
+
+.track i {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: var(--panel);
+  transform: translate(-50%, -50%);
+}
+
+.track i:last-child {
+  background: currentColor;
+  box-shadow: 0 0 16px currentColor;
+}
+
+/* Plain tiles: the section number, outlined. */
+
+.number {
+  font-family: var(--font-display);
+  font-size: 110px;
+  font-weight: 900;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

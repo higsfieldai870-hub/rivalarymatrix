@@ -1,0 +1,243 @@
+/* Site chrome shared by every page: background, header, footer, cursor. */
+
+/* =========================================================
+   BACKGROUND
+========================================================= */
+
+.pitchBg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -2;
+  opacity: 0.13;
+
+  background:
+    linear-gradient(90deg, transparent 49.9%, rgba(255, 255, 255, 0.08) 50%, transparent 50.1%),
+    linear-gradient(0deg, transparent 49.9%, rgba(255, 255, 255, 0.025) 50%, transparent 50.1%);
+}
+
+.pitchCircle {
+  position: fixed;
+  width: 500px;
+  height: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.pitchCircle::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.header {
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid var(--border);
+}
+
+.headerInner,
+.footerInner {
+  width: 100%;
+  max-width: var(--max);
+  margin: auto;
+  padding: 0 30px;
+}
+
+.headerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  min-height: 70px;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.logo span {
+  color: var(--green);
+}
+
+.logoMark {
+  margin-right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+.nav {
+  display: flex;
+  gap: 8px;
+}
+
+.navLink {
+  white-space: nowrap;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: 0.25s;
+}
+
+.navLink:hover,
+.navLink[aria-current="page"] {
+  background: var(--green);
+  border-color: var(--green);
+  color: #000;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+  margin-top: 70px;
+  border-top: 1px solid var(--border);
+  padding: 35px 0;
+}
+
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.footerLogo {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+}
+
+.footerLogo span {
+  color: var(--green);
+}
+
+.footer p {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   CURSOR
+========================================================= */
+
+.cursorBall,
+.cursorRing {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.cursorBall {
+  width: 25px;
+  height: 25px;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  filter: drop-shadow(0 0 8px rgba(184, 255, 0, 0.5));
+  transition: opacity 0.2s;
+}
+
+.cursorRing {
+  width: 45px;
+  height: 45px;
+  z-index: 99998;
+  border: 1px solid rgba(184, 255, 0, 0.3);
+  border-radius: 50%;
+  transition:
+    width 0.2s,
+    height 0.2s,
+    border-color 0.2s,
+    opacity 0.2s;
+}
+
+.cursorBall[data-visible],
+.cursorRing[data-visible] {
+  opacity: 1;
+}
+
+.cursorRing[data-hover] {
+  width: 65px;
+  height: 65px;
+  border-color: var(--green);
+}
+
+@media (hover: none), (pointer: coarse) {
+  .cursorBall,
+  .cursorRing {
+    display: none;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
+  .headerInner,
+  .footerInner {
+    padding: 0 15px;
+  }
+
+  .headerInner {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .logo {
+    font-size: 19px;
+  }
+
+  .nav {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .navLink {
+    padding: 9px 12px;
+    letter-spacing: 1.5px;
+  }
+
+  .footerInner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}

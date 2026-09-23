@@ -1,26 +1,106 @@
 @import "tailwindcss";
 
+/* =========================================================
+   TOKENS
+========================================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #050706;
+  --bg2: #080c09;
+
+  --panel: #0b100d;
+  --panel2: #101611;
+
+  --green: #b8ff00;
+  --green-dark: #8dcc00;
+
+  --blue: #4d9dff;
+  --blue-light: #6aaeff;
+
+  --gold: #f5c84b;
+
+  --white: #f4f7f4;
+
+  --muted: #849087;
+  --muted2: #5d675f;
+
+  --border: rgba(255, 255, 255, 0.09);
+
+  --max: 1450px;
+
+  --font-display: var(--font-barlow), "Barlow Condensed", sans-serif;
+  --font-body: var(--font-inter), Inter, sans-serif;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg);
+  --color-foreground: var(--white);
+  --font-sans: var(--font-body);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =========================================================
+   BASE
+========================================================= */
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+
+  background:
+    radial-gradient(circle at 10% 10%, rgba(184, 255, 0, 0.055), transparent 30%),
+    radial-gradient(circle at 90% 20%, rgba(77, 157, 255, 0.055), transparent 30%),
+    linear-gradient(180deg, #050706, #080c09 50%, #050706);
+  background-color: var(--bg);
+
+  color: var(--white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--green);
+  color: #000;
+}
+
+/* The football cursor replaces the native one on fine pointers. */
+@media (hover: hover) and (pointer: fine) {
+  html.ball-cursor,
+  html.ball-cursor * {
+    cursor: none !important;
+  }
+}
+
+/* =========================================================
+   SCROLL REVEAL
+   Elements stay visible until RevealObserver hydrates.
+========================================================= */
+
+.reveal-ready [data-reveal] {
+  opacity: 0;
+  transform: translateY(25px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease;
+}
+
+.reveal-ready [data-reveal][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal-ready [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
 }
