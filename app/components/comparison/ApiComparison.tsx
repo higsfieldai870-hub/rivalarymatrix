@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { connection } from "next/server";
-import type { DataSource, PlayerDossier } from "@/lib/player-stats";
+import type { PlayerDossier } from "@/lib/player-stats";
 import { describeApiError, hasApiKey } from "@/lib/bsd/client";
-import { getDataSource, getPlayerDossier } from "@/lib/bsd/players";
+import { getPlayerDossier } from "@/lib/bsd/players";
 import api from "./api.module.css";
 import ComparisonView from "./ComparisonView";
 import { MissingKeyNotice, Notice, NoticeBlock } from "./Notices";
 
 type Loaded =
-  | { status: "ok"; left: PlayerDossier; right: PlayerDossier; source: DataSource }
+  | { status: "ok"; left: PlayerDossier; right: PlayerDossier }
   | { status: "missing"; messages: string[] }
   | { status: "error"; message: string };
 
@@ -16,7 +16,7 @@ async function load(leftId: number, rightId: number): Promise<Loaded> {
   try {
     const [left, right] = await Promise.all([getPlayerDossier(leftId), getPlayerDossier(rightId)]);
     if (left.status === "ok" && right.status === "ok") {
-      return { status: "ok", left: left.dossier, right: right.dossier, source: getDataSource() };
+      return { status: "ok", left: left.dossier, right: right.dossier };
     }
     const messages = [left, right].flatMap((r) => (r.status === "missing" ? [r.message] : []));
     return { status: "missing", messages };
@@ -64,5 +64,5 @@ export default async function ApiComparison({ leftId, rightId }: { leftId: numbe
     );
   }
 
-  return <ComparisonView left={result.left} right={result.right} source={result.source} />;
+  return <ComparisonView left={result.left} right={result.right} />;
 }

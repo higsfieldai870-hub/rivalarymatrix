@@ -10,7 +10,6 @@ import {
   leftShare,
   seasonLabel,
   type CompetitionRow,
-  type DataSource,
   type Num,
   type PlayerDossier,
   type Side,
@@ -45,7 +44,7 @@ export function SectionHeader({
   id?: string;
   label: string;
   title: string;
-  children: ReactNode;
+  children?: ReactNode;
 }) {
   return (
     <div className={styles.sectionHeader} id={id}>
@@ -53,7 +52,7 @@ export function SectionHeader({
         <div className={styles.sectionLabel}>{label}</div>
         <h2 className={styles.sectionTitle}>{title}</h2>
       </div>
-      <div className={styles.sectionDescription}>{children}</div>
+      {children && <div className={styles.sectionDescription}>{children}</div>}
     </div>
   );
 }
@@ -232,10 +231,7 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
 
   return (
     <Section id="bio">
-      <SectionHeader label="PLAYER FILE" title="Player Bio">
-        Profile, contract and international record for both players. Caps
-        count matches with recorded statistics, not the official total.
-      </SectionHeader>
+      <SectionHeader label="PLAYER FILE" title="Player Bio" />
 
       <div className={styles.careerCard} data-reveal>
         <div className={styles.careerTop}>
@@ -261,41 +257,7 @@ export function Bio({ players, names }: { players: Pair; names: [string, string]
 // Scope-driven sections
 // ---------------------------------------------------------------------------
 
-// Seasons in this scope that carry matches for one player.
-function seasonsOnRecord(view: ComparisonViewModel, side: Side) {
-  return view.seasons.filter((s) => s[side] !== null).map((s) => s.season);
-}
-
-// First season in this scope with matches on record, and the player's age
-// then, so a career that began before the data does is easy to spot.
-function recordsFrom(view: ComparisonViewModel, dossier: PlayerDossier, side: Side) {
-  const seasons = seasonsOnRecord(view, side);
-  if (!seasons.length) return "—";
-  const first = Math.min(...seasons);
-  const born = Number(dossier.profile.birthDate?.slice(0, 4));
-  return born ? `${seasonLabel(first)} · age ${first - born}` : seasonLabel(first);
-}
-
-// The window the numbers actually cover, so a partial range is obvious next
-// to the totals instead of only in the small print at the foot of the page.
-function onRecord(view: ComparisonViewModel, side: Side) {
-  const seasons = seasonsOnRecord(view, side);
-  if (!seasons.length) return "No seasons on record";
-  const first = Math.min(...seasons);
-  const last = Math.max(...seasons);
-  const span = first === last ? seasonLabel(first) : `${seasonLabel(first)}–${seasonLabel(last)}`;
-  return `${seasons.length} season${seasons.length === 1 ? "" : "s"} · ${span}`;
-}
-
-export function CareerCard({
-  view,
-  scopeLabel,
-  players,
-}: {
-  view: ComparisonViewModel;
-  scopeLabel: string;
-  players: Pair;
-}) {
+export function CareerCard({ view, scopeLabel }: { view: ComparisonViewModel; scopeLabel: string }) {
   const rows: { label: string; left: Num; right: Num; decimals?: number }[] = [
     { label: "GOALS", left: view.left.goals, right: view.right.goals },
     { label: "APPEARANCES", left: view.left.apps, right: view.right.apps },
@@ -307,11 +269,7 @@ export function CareerCard({
   return (
     <section id="career" className={`${styles.careerSection} ${api.anchor}`}>
       <div className={styles.container}>
-        <SectionHeader label={`${upper(scopeLabel)} DATA`} title="Career Stats On Record">
-          Every match BSD holds in this scope, summed. BSD&apos;s player data starts
-          with 2011/12, so seasons before that are missing and these totals are
-          floors, not official career records.
-        </SectionHeader>
+        <SectionHeader label={`${upper(scopeLabel)} DATA`} title="Career Stats On Record" />
 
         <div className={styles.careerCard} data-reveal>
           <div className={styles.careerTop}>
@@ -332,21 +290,6 @@ export function CareerCard({
             </div>
           ))}
 
-          <div className={`${styles.careerRow} ${api.recordsRow}`}>
-            <div className={`${styles.careerNumber} ${styles.left}`}>
-              {recordsFrom(view, players[0], "left")}
-            </div>
-            <div className={styles.careerStat}>ON RECORD FROM</div>
-            <div className={`${styles.careerNumber} ${styles.right}`}>
-              {recordsFrom(view, players[1], "right")}
-            </div>
-          </div>
-
-          <div className={`${styles.careerRow} ${api.recordsRow}`}>
-            <div className={`${styles.careerNumber} ${styles.left}`}>{onRecord(view, "left")}</div>
-            <div className={styles.careerStat}>SEASONS COVERED</div>
-            <div className={`${styles.careerNumber} ${styles.right}`}>{onRecord(view, "right")}</div>
-          </div>
         </div>
 
         <p className={api.coverage}>
@@ -395,10 +338,7 @@ export function Analytics({ view }: { view: ComparisonViewModel }) {
 
   return (
     <Section id="analytics">
-      <SectionHeader label="PERFORMANCE LAB" title="Advanced Analytics">
-        Scoring, creativity, match ratings and workload season by season, plus
-        an attribute profile built from the API&apos;s detailed stats.
-      </SectionHeader>
+      <SectionHeader label="PERFORMANCE LAB" title="Advanced Analytics" />
 
       <ChartCard index={++index} title="Goals By Season" meta={`GOALS • ${span}`}>
         <div className={styles.fullChart}>
@@ -432,10 +372,6 @@ export function Analytics({ view }: { view: ComparisonViewModel }) {
                 <div className={`${styles.profileDot} ${styles.dotRight}`} />
                 {upper(b)}
               </div>
-              <p>
-                Each axis is scaled so the stronger of the two scores 100. Hover
-                a point for the raw number behind it.
-              </p>
             </div>
           </div>
         </ChartCard>
@@ -506,10 +442,7 @@ export function StatBattle({ view }: { view: ComparisonViewModel }) {
 
   return (
     <Section id="stat-battle">
-      <SectionHeader label="STAT BATTLE" title="Every Metric">
-        Every statistic BSD records for these players, grouped by type.
-        Each bar splits the combined value of both players.
-      </SectionHeader>
+      <SectionHeader label="STAT BATTLE" title="Every Metric" />
 
       <div className={styles.metrics} data-reveal>
         {groups.map((group) => (
@@ -559,10 +492,7 @@ export function StatBattle({ view }: { view: ComparisonViewModel }) {
 export function Per90({ view, players }: { view: ComparisonViewModel; players: Pair }) {
   return (
     <Section id="per-90">
-      <SectionHeader label="EFFICIENCY" title="Per 90 Minutes">
-        Output normalised to a full match. Detailed stats use only the minutes
-        where the API tracked them.
-      </SectionHeader>
+      <SectionHeader label="EFFICIENCY" title="Per 90 Minutes" />
 
       <div className={styles.per90Grid}>
         {(["left", "right"] as const).map((side, i) => {
@@ -615,9 +545,7 @@ export function SeasonTable({ view, players }: { view: ComparisonViewModel; play
 
   return (
     <Section id="seasons">
-      <SectionHeader label="SEASON BY SEASON" title="Every Season">
-        Every season BSD has statistics for, labelled by the year it starts.
-      </SectionHeader>
+      <SectionHeader label="SEASON BY SEASON" title="Every Season" />
 
       <div className={styles.seasonTable}>
         {shown.map((row) => (
@@ -741,10 +669,7 @@ function CompetitionList({ rows, side, name }: { rows: CompetitionRow[]; side: S
 export function Competitions({ view }: { view: ComparisonViewModel }) {
   return (
     <Section id="competitions">
-      <SectionHeader label="BREAKDOWN" title="By Competition">
-        Appearances, goals and assists in every league and cup, most played
-        first.
-      </SectionHeader>
+      <SectionHeader label="BREAKDOWN" title="By Competition" />
 
       <div className={api.columns}>
         <CompetitionList rows={view.competitions[0]} side="left" name={view.names[0]} />
@@ -898,10 +823,7 @@ function PathColumn({ dossier, side }: { dossier: PlayerDossier; side: Side }) {
 export function CareerPath({ players }: { players: Pair }) {
   return (
     <Section id="career-path">
-      <SectionHeader label="JOURNEY" title="Career Path">
-        Every club and national team each player has represented, and their
-        full transfer history.
-      </SectionHeader>
+      <SectionHeader label="JOURNEY" title="Career Path" />
 
       <div className={api.columns}>
         <PathColumn dossier={players[0]} side="left" />
@@ -1044,10 +966,7 @@ export function ScoutingReport({ players, names }: { players: Pair; names: [stri
 
   return (
     <Section id="scouting">
-      <SectionHeader label="SCOUTING" title="Scouting Report">
-        Scouting attributes on a 0–20 scale, overall ability out of 200, and the
-        strengths and weaknesses scouts have identified.
-      </SectionHeader>
+      <SectionHeader label="SCOUTING" title="Scouting Report" />
 
       {axes.length >= 3 && (
         <div className={styles.chartCard} data-reveal>
@@ -1126,61 +1045,11 @@ function MediaColumn({ dossier, side }: { dossier: PlayerDossier; side: Side }) 
 export function Media({ players }: { players: Pair }) {
   return (
     <Section id="media">
-      <SectionHeader label="MEDIA" title="Latest Media">
-        Recent highlight videos and posts linked to each player. Links open the
-        original source.
-      </SectionHeader>
+      <SectionHeader label="MEDIA" title="Latest Media" />
 
       <div className={api.columns}>
         <MediaColumn dossier={players[0]} side="left" />
         <MediaColumn dossier={players[1]} side="right" />
-      </div>
-    </Section>
-  );
-}
-
-export function DataNotes({ players, source }: { players: Pair; source: DataSource | null }) {
-  const range = (d: PlayerDossier) => {
-    const s = [...d.seasonsLoaded].sort((a, b) => a - b);
-    return s.length ? `${s.length} seasons (${s[0]}–${s.at(-1)})` : "no seasons";
-  };
-  const notes = players.flatMap((d) =>
-    d.warnings.map((warning) => `${displayName(d.profile)}: ${warning}`),
-  );
-
-  return (
-    <Section id="data">
-      <div className={api.notes}>
-        <h3>About This Data</h3>
-        <ul>
-          <li>
-            Source: <strong>{source?.provider ?? "BSD"}</strong>. Responses are cached for a few
-            hours, so repeat visits don&apos;t use more requests. Not official league data.
-          </li>
-          <li>
-            Careers are counted from the matches BSD holds. Seasons it has no match data for,
-            usually the older ones, are missing, so appearances, goals, assists and caps are
-            floors, not official career totals.
-          </li>
-          {players.map((d) => (
-            <li key={d.profile.id}>
-              {displayName(d.profile)}: statistics for {range(d)}.
-            </li>
-          ))}
-          <li>
-            Detailed match statistics (shots, passes, duels, xG) exist from about 2015/16;
-            earlier seasons show appearances, minutes, goals and assists only.
-          </li>
-          {source?.quota && (
-            <li>
-              Daily quota: <strong>{formatNum(source.quota.remaining)}</strong> of{" "}
-              {formatNum(source.quota.limit)} requests left today.
-            </li>
-          )}
-          {notes.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
       </div>
     </Section>
   );

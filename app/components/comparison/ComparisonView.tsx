@@ -1,11 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   latestSeason,
   scopes,
   seasonLabel,
-  type DataSource,
   type PlayerDossier,
   type Scope,
 } from "@/lib/player-stats";
@@ -18,7 +17,6 @@ import {
   CareerCard,
   CareerPath,
   Competitions,
-  DataNotes,
   Media,
   Per90,
   ScoutingReport,
@@ -30,14 +28,70 @@ import {
 import { Notice } from "./Notices";
 import { buildViewModel } from "./view-model";
 
+const iconProps = {
+  width: 22,
+  height: 22,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.8,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+} as const;
+
+// Icon and short label for the mobile bottom bar.
+const SCOPE_TAB: Record<Scope, { short: string; icon: ReactNode }> = {
+  career: {
+    short: "Career",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M3 17l6-6 4 4 8-8" />
+        <path d="M15 7h6v6" />
+      </svg>
+    ),
+  },
+  club: {
+    short: "Club",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z" />
+      </svg>
+    ),
+  },
+  international: {
+    short: "Intl",
+    icon: (
+      <svg {...iconProps}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+      </svg>
+    ),
+  },
+  ucl: {
+    short: "UCL",
+    icon: (
+      <svg {...iconProps}>
+        <path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z" />
+      </svg>
+    ),
+  },
+  latest: {
+    short: "Season",
+    icon: (
+      <svg {...iconProps}>
+        <rect x="3" y="5" width="18" height="16" rx="2" />
+        <path d="M3 10h18M8 3v4M16 3v4" />
+      </svg>
+    ),
+  },
+};
+
 export default function ComparisonView({
   left,
   right,
-  source,
 }: {
   left: PlayerDossier;
   right: PlayerDossier;
-  source: DataSource | null;
 }) {
   const [scope, setScope] = useState<Scope>("career");
   const latest = useMemo(() => latestSeason(left, right), [left, right]);
@@ -69,7 +123,13 @@ export default function ComparisonView({
               disabled={s.id === "latest" && latest === null}
               onClick={() => setScope(s.id)}
             >
-              {labelFor(s.id, s.label)}
+              <span className={api.scopeIcon} aria-hidden>
+                {SCOPE_TAB[s.id].icon}
+              </span>
+              <span className={api.scopeLong}>{labelFor(s.id, s.label)}</span>
+              <span className={api.scopeShort} aria-hidden>
+                {labelFor(s.id, SCOPE_TAB[s.id].short)}
+              </span>
             </button>
           ))}
         </div>
@@ -90,7 +150,7 @@ export default function ComparisonView({
         </section>
       ) : (
         <>
-          <CareerCard view={view} scopeLabel={scopeLabel} players={players} />
+          <CareerCard view={view} scopeLabel={scopeLabel} />
           <Analytics view={view} />
           <StatBattle view={view} />
           <Per90 view={view} players={players} />
@@ -103,7 +163,6 @@ export default function ComparisonView({
       <CareerPath players={players} />
       {hasInjuries && <Availability players={players} />}
       {hasMedia && <Media players={players} />}
-      <DataNotes players={players} source={source} />
     </>
   );
 }

@@ -46,9 +46,27 @@
 ========================================================= */
 
 .header {
-  position: relative;
-  z-index: 10;
+  position: sticky;
+  top: 0;
+  z-index: 50;
   border-bottom: 1px solid var(--border);
+  background: transparent;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.header[data-scrolled] {
+  background: rgba(5, 7, 6, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+.header[data-hidden] {
+  transform: translateY(-100%);
+  box-shadow: none;
 }
 
 .headerInner,
@@ -121,32 +139,142 @@
 ========================================================= */
 
 .footer {
-  margin-top: 70px;
+  position: relative;
+  margin-top: 90px;
+  overflow: hidden;
   border-top: 1px solid var(--border);
-  padding: 35px 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(184, 255, 0, 0.03));
 }
 
-.footerInner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
+/* Accent line and soft glow along the top edge. */
+.footerGlow {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: min(720px, 90%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--green), var(--blue), transparent);
+  box-shadow: 0 0 40px 6px rgba(184, 255, 0, 0.18);
+  pointer-events: none;
+}
+
+.footerTop {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1.2fr;
+  gap: 40px;
+  padding: 60px 0 40px;
+}
+
+.footerBrand p {
+  max-width: 360px;
+  margin: 16px 0 22px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .footerLogo {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 20px;
+  font-size: 26px;
+  letter-spacing: 0.5px;
 }
 
 .footerLogo span {
   color: var(--green);
 }
 
-.footer p {
-  color: var(--muted);
+.footerCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 1px solid var(--green);
+  border-radius: 50px;
+  color: var(--green);
   font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: 0.25s;
+}
+
+.footerCta:hover {
+  background: var(--green);
+  color: #000;
+}
+
+.footerCta span {
+  transition: transform 0.25s;
+}
+
+.footerCta:hover span {
+  transform: translateX(3px);
+}
+
+.footerCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.footerCol h4 {
+  margin-bottom: 4px;
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.footerCol a {
+  color: var(--muted);
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.footerCol a:hover {
+  color: var(--green);
+}
+
+.footerCol p {
+  color: var(--muted);
+  font-size: 14px;
   line-height: 1.7;
+}
+
+.footerCol strong {
+  color: var(--white);
+}
+
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 0 28px;
+  border-top: 1px solid var(--border);
+  color: var(--muted2);
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.backToTop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: color 0.2s;
+}
+
+.backToTop:hover {
+  color: var(--green);
 }
 
 /* =========================================================
@@ -215,29 +343,49 @@
     padding: 0 15px;
   }
 
+  /* Logo left, a short button right, on one line. */
   .headerInner {
-    padding-top: 14px;
-    padding-bottom: 14px;
+    flex-wrap: nowrap;
+    min-height: 60px;
   }
 
   .logo {
     font-size: 19px;
   }
 
-  .nav {
-    width: 100%;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
   .navLink {
-    padding: 9px 12px;
+    padding: 8px 14px;
     letter-spacing: 1.5px;
   }
 
-  .footerInner {
+  .navMore {
+    display: none;
+  }
+
+  .footerTop {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 44px 0 30px;
+  }
+
+  .footerBottom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 15px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .footerTop {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .footerBrand {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header {
+    transition: none;
   }
 }
