@@ -369,15 +369,141 @@
    RESPONSIVE
 ========================================================= */
 
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+.menuButton {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Logo on the left, hamburger on the right. */
+  .headerInner {
+    flex-wrap: nowrap;
+    gap: 14px;
+  }
+
+  .menuButton {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    flex-shrink: 0;
+    margin-left: auto;
+    width: 42px;
+    height: 42px;
+    padding: 0 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition:
+      border-color 0.25s,
+      background 0.25s;
+  }
+
+  .menuButton span {
+    display: block;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--white);
+    transition:
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.2s;
+  }
+
+  .menuButton span:nth-child(2) {
+    width: 70%;
+  }
+
+  .header[data-open] .menuButton {
+    border-color: var(--green);
+    background: rgba(184, 255, 0, 0.08);
+  }
+
+  /* The three bars fold into a cross. */
+  .header[data-open] .menuButton span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .header[data-open] .menuButton span:nth-child(2) {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+
+  .header[data-open] .menuButton span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* The links drop down under the header. */
+  .nav {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 15px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5, 7, 6, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition:
+      opacity 0.25s ease,
+      transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0.3s;
+  }
+
+  .header[data-open] .nav {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .header[data-open] {
+    background: rgba(5, 7, 6, 0.96);
+  }
+
+  .navLink,
+  .navLink:hover {
+    display: flex;
+    align-items: center;
+    gap: 0.35em;
+    padding: 16px 18px;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+
+  .navLink::after {
+    content: "→";
+    margin-left: auto;
+    letter-spacing: 0;
+  }
+
+  .navMore {
+    display: inline;
+  }
+}
+
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .nav,
+  .menuButton span {
+    transition: none;
+  }
+}
+
 @media (max-width: 600px) {
   .headerInner,
   .footerInner {
     padding: 0 15px;
   }
 
-  /* Logo left, a short button right, on one line. */
   .headerInner {
-    flex-wrap: nowrap;
     min-height: 60px;
   }
 
@@ -389,15 +515,6 @@
     width: 32px;
     height: 32px;
     margin-right: 8px;
-  }
-
-  .navLink {
-    padding: 8px 14px;
-    letter-spacing: 1.5px;
-  }
-
-  .navMore {
-    display: none;
   }
 
   .footerTop {
