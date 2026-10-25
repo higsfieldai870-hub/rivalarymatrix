@@ -49,7 +49,7 @@ const features = [
   },
   {
     title: "Profile and career path",
-    text: "Age, height, preferred foot, market value, contract and wage, every club played for, international caps and goals, trophies won and injury history.",
+    text: "Age, height, preferred foot, market value, contract and wage, every club played for, transfer history, international caps and goals, and current fitness.",
   },
 ];
 
@@ -139,7 +139,9 @@ export default function ComparePage() {
           <p className={page.lead}>
             A player comparison here is more than a goals column. Each head-to-head lines both
             players up across the full range of their game, from raw output to the underlying
-            numbers scouts use, so you can see not just who scored more but how and when.
+            numbers scouts use, so you can see not just who scored more but how and when. Not
+            sure what a stat means? The <Link href="/stats-guide">football stats guide</Link>{" "}
+            explains every one.
           </p>
           <div className={page.grid}>
             {features.map((f) => (

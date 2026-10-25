@@ -1,8 +1,23 @@
-import styles from "./guide.module.css";
+import type { Metadata } from "next";
+import Link from "next/link";
+import compare from "@/app/components/comparison/comparison.module.css";
+import JsonLd from "@/app/components/JsonLd";
+import { absoluteUrl, openGraph } from "@/lib/site";
+import styles from "./stats-guide.module.css";
 
-// Plain-English definitions for every number on a comparison page. Rendered
-// on the server below the comparison, so it is part of the page's text for
-// readers and search engines alike, whatever the stats themselves show.
+// Plain-English definitions for every number on a comparison page. One page
+// that every comparison links to, rather than the same text on each of them.
+
+const title = "Football Stats Explained: xG, Per 90, Key Passes and More";
+const description =
+  "What every football stat means, in plain English: expected goals (xG), xA, per 90 numbers, key passes, duels, shot conversion, match ratings and scouting reports.";
+
+export const metadata: Metadata = {
+  title,
+  description,
+  alternates: { canonical: "/stats-guide" },
+  openGraph: openGraph("/stats-guide", title, description),
+};
 
 type Term = { term: string; meaning: string };
 type Group = { title: string; intro?: string; terms: Term[] };
@@ -104,36 +119,66 @@ const groups: Group[] = [
   },
 ];
 
-export default function StatsGuide({ left, right }: { left: string; right: string }) {
-  return (
-    <section className={styles.guide} id="stats-guide">
-      <div className={styles.container}>
-        <div className={styles.label}>STATS GUIDE</div>
-        <h2 className={styles.title}>What The Numbers Mean</h2>
-        <p className={styles.lead}>
-          Every number in this {left} vs {right} comparison, explained. Match data covers the
-          2011/12 season onwards. Detailed stats such as shots, passes and duels come from
-          matches with full per-match data, so for older seasons they can cover fewer games than
-          goals and appearances.
-        </p>
+export default function StatsGuidePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    name: "Football stats glossary",
+    url: absoluteUrl("/stats-guide"),
+    hasDefinedTerm: groups.flatMap((g) =>
+      g.terms.map((t) => ({ "@type": "DefinedTerm", name: t.term, description: t.meaning })),
+    ),
+  };
 
-        <div className={styles.groups}>
-          {groups.map((g) => (
-            <div key={g.title} className={styles.group}>
-              <h3>{g.title}</h3>
-              {g.intro && <p className={styles.groupIntro}>{g.intro}</p>}
-              <dl>
-                {g.terms.map((t) => (
-                  <div key={t.term}>
-                    <dt>{t.term}</dt>
-                    <dd>{t.meaning}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          ))}
+  return (
+    <>
+      <JsonLd data={jsonLd} />
+
+      <section className={compare.hero}>
+        <div className={compare.container}>
+          <div className={compare.eyebrow}>
+            <i className={compare.eyebrowDot} />
+            STATS GUIDE
+          </div>
+          <h1 className={compare.heroTitle}>
+            FOOTBALL STATS <span>EXPLAINED</span>
+          </h1>
+          <p className={compare.heroText}>
+            What every number in a player comparison means, from goals per game to expected
+            goals, and how to read them without getting fooled by the totals.
+          </p>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section className={styles.guide}>
+        <div className={styles.container}>
+          <p className={styles.lead}>
+            Match data covers the 2011/12 season onwards. Detailed stats such as shots, passes and
+            duels come from matches with full per-match data, so for older seasons they can cover
+            fewer games than goals and appearances. To see these numbers in action, open a
+            comparison like{" "}
+            <Link href="/compare/erling-haaland-vs-kylian-mbappe">Haaland vs Mbappé</Link> or{" "}
+            <Link href="/compare">compare any two players</Link>.
+          </p>
+
+          <div className={styles.groups}>
+            {groups.map((g) => (
+              <div key={g.title} className={styles.group}>
+                <h2>{g.title}</h2>
+                {g.intro && <p className={styles.groupIntro}>{g.intro}</p>}
+                <dl>
+                  {g.terms.map((t) => (
+                    <div key={t.term}>
+                      <dt>{t.term}</dt>
+                      <dd>{t.meaning}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
   );
 }

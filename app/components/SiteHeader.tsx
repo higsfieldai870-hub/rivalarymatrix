@@ -10,7 +10,7 @@ import styles from "./site.module.css";
 const links = [
   { href: "/compare", label: "Compare", more: " Players" },
   { href: "/rivalries", label: "Rivalries", more: "" },
-  { href: "/live", label: "Watch", more: " Live" },
+  { href: "/stats-guide", label: "Stats", more: " Explained" },
 ];
 
 // Scroll distance that counts as a deliberate direction change, so small

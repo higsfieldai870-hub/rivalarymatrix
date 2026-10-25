@@ -3,7 +3,7 @@
 export const SITE_NAME = "Rivalry Matrix";
 
 export const SITE_DESCRIPTION =
-  "Football's biggest rivalries settled with data: career numbers, season-by-season charts, per-90 efficiency and trophy cabinets, side by side.";
+  "Football's biggest rivalries settled with data: career numbers, season-by-season charts, per-90 efficiency and scouting reports, side by side.";
 
 // The public origin, without a trailing slash, used for canonical URLs, the
 // sitemap and robots.txt. NEXT_PUBLIC_SITE_URL overrides it (e.g. staging).

@@ -5,7 +5,7 @@ const explore = [
   { href: "/", label: "Home" },
   { href: "/compare", label: "Compare Players" },
   { href: "/rivalries", label: "Popular Rivalries" },
-  { href: "/live", label: "Watch Live Football" },
+  { href: "/stats-guide", label: "Football Stats Explained" },
 ];
 
 export default function SiteFooter() {

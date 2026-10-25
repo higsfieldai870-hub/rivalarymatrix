@@ -11,14 +11,14 @@ export const revalidate = 86400;
 // strongest pages.
 const priority = { iconic: 0.9, "same-role": 0.7 } as const;
 
+// No lastModified: the only date available is the rebuild time, and a
+// lastmod that changes daily for unchanged pages teaches Google to ignore it.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-
   const pages: MetadataRoute.Sitemap = [
-    { url: absoluteUrl("/"), lastModified: now, changeFrequency: "daily", priority: 1 },
-    { url: absoluteUrl("/compare"), lastModified: now, changeFrequency: "weekly", priority: 0.9 },
-    { url: absoluteUrl("/rivalries"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: absoluteUrl("/live"), lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    { url: absoluteUrl("/"), changeFrequency: "daily", priority: 1 },
+    { url: absoluteUrl("/compare"), changeFrequency: "weekly", priority: 0.9 },
+    { url: absoluteUrl("/rivalries"), changeFrequency: "daily", priority: 0.9 },
+    { url: absoluteUrl("/stats-guide"), changeFrequency: "monthly", priority: 0.7 },
   ];
 
   const matchups = (await getPopularMatchups()).flatMap(
@@ -28,7 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         : [
             {
               url: absoluteUrl(m.path),
-              lastModified: now,
               changeFrequency: "weekly",
               priority: priority[m.kind],
               images: [m.left.player.photo, m.right.player.photo],

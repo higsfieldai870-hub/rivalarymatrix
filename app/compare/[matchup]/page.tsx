@@ -1,21 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
+import { notFound, permanentRedirect } from "next/navigation";
 import api from "@/app/components/comparison/api.module.css";
 import JsonLd from "@/app/components/JsonLd";
-import ApiComparison from "@/app/components/comparison/ApiComparison";
-import StatsGuide from "@/app/components/comparison/StatsGuide";
+import ComparisonView from "@/app/components/comparison/ComparisonView";
 import styles from "@/app/components/comparison/comparison.module.css";
-import {
-  ComparisonSkeleton,
-  MissingKeyNotice,
-  Notice,
-  NoticeBlock,
-} from "@/app/components/comparison/Notices";
+import { MissingKeyNotice, NoticeBlock } from "@/app/components/comparison/Notices";
 import { displayName, shortName } from "@/app/components/comparison/view-model";
 import { hasApiKey } from "@/lib/bsd/client";
 import { resolveMatchup } from "@/lib/bsd/matchup";
+import { getPlayerDossier } from "@/lib/bsd/players";
 import { findPopularMatchup } from "@/lib/bsd/popular";
 import { rivalryNote } from "@/lib/popular-players";
 import { absoluteUrl, openGraph, SITE_URL } from "@/lib/site";
@@ -58,11 +52,13 @@ export async function generateMetadata({
   };
 }
 
-const searchAgain = (
-  <Link className={api.inlineLink} href="/compare">
-    Search for the players again
-  </Link>
-);
+// Both players' full records. Data trouble throws (usually the daily BSD
+// quota), and the page answers with a server error that crawlers retry later.
+async function loadDossiers(leftId: number, rightId: number) {
+  const [left, right] = await Promise.all([getPlayerDossier(leftId), getPlayerDossier(rightId)]);
+  if (left.status !== "ok" || right.status !== "ok") notFound();
+  return [left.dossier, right.dossier] as const;
+}
 
 export default async function MatchupPage({ params }: PageProps<"/compare/[matchup]">) {
   const { matchup } = await params;
@@ -75,44 +71,20 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
     );
   }
 
+  // Everything is loaded before the response starts, so a failure gets a real
+  // status code. Streamed in after a 200, an error message would be crawled
+  // and indexed as the page's content.
   const result = await resolveMatchup(matchup);
-
-  if (result.status === "invalid") notFound();
-
-  if (result.status === "error") {
-    return (
-      <NoticeBlock>
-        <Notice title="Couldn't load the comparison" error>
-          {result.message}
-        </Notice>
-      </NoticeBlock>
-    );
-  }
-
-  if (result.status === "missing") {
-    return (
-      <NoticeBlock>
-        <Notice title="Player not found" error>
-          No player called {result.names.map((n) => `“${n}”`).join(" or ")}. {searchAgain}.
-        </Notice>
-      </NoticeBlock>
-    );
-  }
+  if (result.status === "invalid" || result.status === "missing") notFound();
+  if (result.status === "error") throw new Error(result.message);
 
   // One URL per matchup: fix case and accents, and add or drop ids.
-  if (result.path !== `/compare/${matchup}`) redirect(result.path);
+  if (result.path !== `/compare/${matchup}`) permanentRedirect(result.path);
 
   const { left, right } = result;
+  if (left.id === right.id) notFound();
 
-  if (left.id === right.id) {
-    return (
-      <NoticeBlock>
-        <Notice title="Same player twice">
-          {displayName(left)} is on both sides. {searchAgain}.
-        </Notice>
-      </NoticeBlock>
-    );
-  }
+  const [leftDossier, rightDossier] = await loadDossiers(left.id, right.id);
 
   const title = `${displayName(left)} vs ${displayName(right)}`;
 
@@ -120,7 +92,7 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
   const popular = await findPopularMatchup(left.id, right.id);
   const note = popular && rivalryNote(popular.left.name, popular.right.name);
   const club = (p: typeof left) => (p.currentTeam ? ` (${p.currentTeam})` : "");
-  const intro = `${displayName(left)}${club(left)} vs ${displayName(right)}${club(right)}: career goals and assists, per-90 output, season-by-season form, scouting ratings, transfers and trophies, side by side.`;
+  const intro = `${displayName(left)}${club(left)} vs ${displayName(right)}${club(right)}: career goals and assists, per-90 output, season-by-season form, scouting ratings and transfers, side by side.`;
   const person = (p: typeof left) => ({
     "@type": "Person",
     name: displayName(p),
@@ -179,11 +151,16 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
         </div>
       </section>
 
-      <Suspense key={`${left.id}-${right.id}`} fallback={<ComparisonSkeleton />}>
-        <ApiComparison leftId={left.id} rightId={right.id} />
-      </Suspense>
+      <ComparisonView key={`${left.id}-${right.id}`} left={leftDossier} right={rightDossier} />
 
-      <StatsGuide left={displayName(left)} right={displayName(right)} />
+      <section className={api.guideLink}>
+        <div className={styles.container}>
+          <p>
+            New to stats like xG, key passes or per 90 numbers?{" "}
+            <Link href="/stats-guide">Read what every number in this comparison means</Link>.
+          </p>
+        </div>
+      </section>
     </>
   );
 }

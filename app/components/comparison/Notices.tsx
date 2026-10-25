@@ -40,18 +40,3 @@ export function MissingKeyNotice() {
     </Notice>
   );
 }
-
-export function ComparisonSkeleton() {
-  return (
-    <section className={styles.container} aria-busy="true">
-      <p className={api.loadingText}>
-        <span className={api.spinner} aria-hidden />
-        Loading live data. The first load of a player gathers every season and can take a few
-        seconds; after that it&apos;s cached.
-      </p>
-      <div className={`${api.skeleton} ${api.skeletonShowcase}`} />
-      <div className={`${api.skeleton} ${api.skeletonBlock}`} />
-      <div className={`${api.skeleton} ${api.skeletonBlock}`} />
-    </section>
-  );
-}

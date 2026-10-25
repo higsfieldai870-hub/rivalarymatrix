@@ -23,7 +23,6 @@ import { bsdGet, IMAGE_BASE, isBsdError, lastKnownQuota } from "./client";
 // Each request is cached on disk with a lifetime suited to how often it
 // changes, and so is the finished dossier.
 
-const HOUR = 3_600;
 const DAY = 86_400;
 
 const CLUB_FRIENDLIES = 79;
@@ -157,7 +156,7 @@ const getMedia = unstable_cache(
   async (id: number) =>
     (await orNull(bsdGet<Page<BsdSocialItem>>(`/players/${id}/social/`, { limit: 6 })))?.results ?? [],
   ["bsd", "social"],
-  { revalidate: 6 * HOUR },
+  { revalidate: DAY },
 );
 
 const getLeagues = unstable_cache(
@@ -191,7 +190,9 @@ const getTeam = unstable_cache(
 );
 
 // One career row's matches. Finished seasons never change, so they are
-// kept for a month; the current one refreshes every few hours.
+// kept for a month; the current one refreshes daily. Refresh rates are set
+// by the free API plan's daily request quota: running out turns pages into
+// errors, which costs far more than a day-old number.
 async function rowStats(playerId: number, seasonId: number, leagueId: number, teamId: number | null) {
   const matches: BsdMatchStat[] = [];
   const filters: Record<string, number> = { season_id: seasonId, league_id: leagueId, limit: 200 };
@@ -206,7 +207,7 @@ async function rowStats(playerId: number, seasonId: number, leagueId: number, te
 
 const getFinishedRowStats = unstable_cache(rowStats, ["bsd", "row-stats"], { revalidate: 30 * DAY });
 const getCurrentRowStats = unstable_cache(rowStats, ["bsd", "row-stats-current"], {
-  revalidate: 6 * HOUR,
+  revalidate: DAY,
 });
 
 // ---------------------------------------------------------------------------
@@ -646,7 +647,7 @@ export const getPlayerDossier = cache(
         : { status: "missing", message: `BSD has no player with id ${id}.` };
     },
     ["bsd", "dossier", "v2"],
-    { revalidate: 6 * HOUR },
+    { revalidate: DAY },
   ),
 );
 

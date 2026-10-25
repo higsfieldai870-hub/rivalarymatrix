@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import compare from "@/app/components/comparison/comparison.module.css";
 import JsonLd from "@/app/components/JsonLd";
-import { getPopularMatchups, resolvePopularPlayers, type PopularMatchup } from "@/lib/bsd/popular";
+import { getPopularMatchups, type PopularMatchup } from "@/lib/bsd/popular";
 import { matchupPath, slugify } from "@/lib/player-slug";
 import {
   iconicRivalries,
@@ -20,7 +20,7 @@ export const revalidate = 86400;
 
 const title = "Popular Football Rivalries & Player Comparisons";
 const description =
-  "Browse the most searched football head-to-heads: Messi vs Ronaldo, Haaland vs Mbappé, Yamal vs Vinícius and hundreds more, all with live stats.";
+  "Browse the most searched football head-to-heads: Messi vs Ronaldo, Haaland vs Mbappé, Yamal vs Vinícius and 200 more, grouped by position, all with live stats.";
 
 export const metadata: Metadata = {
   title,
@@ -117,7 +117,9 @@ function MatchupCard({ m }: { m: PopularMatchup }) {
             key={p.player.id}
             className={`${styles.face} ${side === 0 ? styles.faceLeft : styles.faceRight}`}
           >
-            <Image src={p.player.photo} alt="" width={120} height={120} sizes="56px" />
+            {/* Fixed size, no `sizes`: a 1x/2x srcset instead of one entry per breakpoint,
+                which kept this page's HTML far larger than its content. */}
+            <Image src={p.player.photo} alt="" width={56} height={56} />
           </div>
         ))}
       </div>
@@ -133,7 +135,7 @@ function MatchupCard({ m }: { m: PopularMatchup }) {
 }
 
 export default async function RivalriesPage() {
-  const [players, matchups] = await Promise.all([resolvePopularPlayers(), getPopularMatchups()]);
+  const matchups = await getPopularMatchups();
   const iconic = matchups.filter((m) => m.kind === "iconic");
 
   // An inline link to a popular pair, at its canonical URL when BSD resolved it.
@@ -146,8 +148,11 @@ export default async function RivalriesPage() {
   const listed = iconic.length
     ? iconic.map((m) => ({ name: `${m.left.name} vs ${m.right.name}`, path: m.path }))
     : staticIconic.map((m) => ({ name: `${m.left} vs ${m.right}`, path: m.path }));
+  // Mixed-position pairs aren't listed here (they're kept out of the index),
+  // so the count covers the iconic and same-position ones on this page.
   const total =
-    matchups.length || staticByRole.reduce((n, r) => n + r.list.length, staticIconic.length);
+    matchups.filter((m) => m.kind !== "cross-role").length ||
+    staticByRole.reduce((n, r) => n + r.list.length, staticIconic.length);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -175,8 +180,8 @@ export default async function RivalriesPage() {
             FOOTBALL <span>RIVALRIES</span>
           </h1>
           <p className={compare.heroText}>
-            The comparisons fans argue about most, plus every pairing of the game&apos;s biggest
-            names. Pick one and settle it with the numbers.
+            The comparisons fans argue about most, plus head-to-heads between the biggest names in
+            every position. Pick one and settle it with the numbers.
           </p>
         </div>
       </section>
@@ -187,7 +192,7 @@ export default async function RivalriesPage() {
             <p>
               Every rivalry below opens a full head-to-head built from match data: career goals and
               assists, appearances and minutes, season-by-season charts, per-90 efficiency, match
-              ratings and trophy cabinets, side by side. Start with the classics fans have argued
+              ratings and scouting reports, side by side. Start with the classics fans have argued
               about for years, like <Link href={staticIconic[0].path}>Messi vs Ronaldo</Link>, or
               jump to the position you care about.
             </p>
@@ -256,40 +261,6 @@ export default async function RivalriesPage() {
                 </section>
               );
             })}
-
-            <section className={styles.section}>
-              <div className={styles.label}>EVERY PAIRING</div>
-              <h2 className={styles.title}>Compare By Player</h2>
-              <p className={styles.roleIntro}>
-                Every player here is paired with every other, so you can test any star against the
-                rest of the list. Open a name to see all of their head-to-heads.
-              </p>
-              <div className={styles.players}>
-                {players.map((p) => {
-                  const list = matchups.filter(
-                    (m) => m.left.player.id === p.player.id || m.right.player.id === p.player.id,
-                  );
-                  return (
-                    <details key={p.player.id} className={styles.player}>
-                      <summary>
-                        <Image src={p.player.photo} alt="" width={80} height={80} sizes="36px" />
-                        <span>{p.name}</span>
-                        <em>{list.length}</em>
-                      </summary>
-                      <ul>
-                        {list.map((m) => (
-                          <li key={m.path}>
-                            <Link href={m.path}>
-                              vs {m.left.player.id === p.player.id ? m.right.name : m.left.name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </details>
-                  );
-                })}
-              </div>
-            </section>
           </>
         )}
 
