@@ -59,6 +59,65 @@ const roleIntros: Record<Role, string> = {
     "Goalkeeper head-to-heads focus on saves, goals conceded and match ratings, the numbers that separate a good season between the posts from a great one.",
 };
 
+// Why each iconic rivalry matters, keyed by the names in iconicRivalries.
+// Kept to what won't date: no season stats or current clubs.
+const iconicNotes: Record<string, string> = {
+  "Lionel Messi|Cristiano Ronaldo":
+    "The debate that defined a generation. Two players who rewrote the scoring records in Spain and Europe, built in completely different ways.",
+  "Erling Haaland|Kylian Mbappé":
+    "Power against pace. The two forwards expected to dominate the post-Messi and Ronaldo era, both scoring at a rate few have matched.",
+  "Lamine Yamal|Kylian Mbappé":
+    "El Clásico's sharpest edge: Barcelona's teenage prodigy against Real Madrid's established superstar.",
+  "Lamine Yamal|Michael Olise":
+    "Two left-footers on the right wing who cut inside to create, dribble for dribble and assist for assist.",
+  "Pedri|Jude Bellingham":
+    "The Clásico midfield battle: Barcelona's calm, press-resistant passer against Madrid's box-crashing goal threat.",
+  "Vinícius Júnior|Lamine Yamal":
+    "Clásico wingers on opposite flanks, both built to beat a full-back one against one.",
+  "Mohamed Salah|Bukayo Saka":
+    "Liverpool against Arsenal on the right wing: two left-footed wide forwards who carry their teams' goal threat.",
+  "Harry Kane|Erling Haaland":
+    "Complete forward against pure finisher. Kane drops deep to create; Haaland lives in the six-yard box.",
+  "Robert Lewandowski|Harry Kane":
+    "Bayern Munich's number nines, before and after. The comparison every Bayern fan has made since Kane arrived.",
+  "Kevin De Bruyne|Bruno Fernandes":
+    "The playmakers who shaped Manchester's midfields, City's and United's, measured on chances created and end product.",
+  "Florian Wirtz|Jamal Musiala":
+    "Germany's two creative jewels, the same age and position, often picked together and endlessly compared.",
+  "Cole Palmer|Bukayo Saka":
+    "England's competition for the right side: two left-footed creators chasing the same place in the starting line-up.",
+  "Lionel Messi|Neymar":
+    "Teammates at Barcelona and Paris Saint-Germain, and two of the most gifted dribblers of the modern game.",
+  "Cristiano Ronaldo|Karim Benzema":
+    "Real Madrid's partnership through its most successful era in Europe: the finisher and the forward who made space for him.",
+  "Virgil van Dijk|William Saliba":
+    "Liverpool against Arsenal at the back: two composed, quick centre-backs who rarely lose a duel.",
+  "Thibaut Courtois|Alisson":
+    "Two of the best goalkeepers of the era, both Champions League winners, compared on saves and goals conceded.",
+};
+
+const noteFor = (left: string, right: string) =>
+  iconicNotes[`${left}|${right}`] ?? iconicNotes[`${right}|${left}`];
+
+const faqs = [
+  {
+    q: "What makes a football rivalry?",
+    a: "Usually one of three things: two players at rival clubs, two players chasing the same place in a national team, or two stars of the same generation whose fans can't agree who is better. The iconic list above covers all three.",
+  },
+  {
+    q: "Why are the comparisons grouped by position?",
+    a: "Because players are judged on different numbers. Goals and shots matter most for a striker; tackles, interceptions and duels for a defender; saves and goals conceded for a goalkeeper. Comparing within a position keeps the debate fair.",
+  },
+  {
+    q: "Are career totals complete?",
+    a: "Match data starts in the 2011/12 season. For players whose careers began earlier, such as Messi and Ronaldo, the totals here cover their careers from that season on and can sit below the official figures.",
+  },
+  {
+    q: "Can I compare players who aren't listed?",
+    a: "Yes. These are the most searched matchups, but you can build a comparison between any two players in the database.",
+  },
+];
+
 function MatchupTitle({ m }: { m: PopularMatchup }) {
   return (
     <>
@@ -68,11 +127,13 @@ function MatchupTitle({ m }: { m: PopularMatchup }) {
 }
 
 function StaticCard({ m }: { m: StaticMatchup }) {
+  const note = noteFor(m.left, m.right);
   return (
     <Link href={m.path} className={styles.card}>
       <h3>
         {m.left} <span>vs</span> {m.right}
       </h3>
+      {note && <p>{note}</p>}
       <span className={styles.more}>
         COMPARE <span aria-hidden>→</span>
       </span>
@@ -81,6 +142,7 @@ function StaticCard({ m }: { m: StaticMatchup }) {
 }
 
 function MatchupCard({ m }: { m: PopularMatchup }) {
+  const note = m.kind === "iconic" ? noteFor(m.left.name, m.right.name) : undefined;
   return (
     <Link href={m.path} className={styles.card}>
       <div className={styles.faces}>
@@ -96,6 +158,7 @@ function MatchupCard({ m }: { m: PopularMatchup }) {
       <h3>
         <MatchupTitle m={m} />
       </h3>
+      {note && <p>{note}</p>}
       <span className={styles.more}>
         COMPARE <span aria-hidden>→</span>
       </span>
@@ -270,6 +333,19 @@ export default async function RivalriesPage() {
               so career totals for long-serving players, Messi and Ronaldo among them, can sit below
               the official figures.
             </p>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.label}>FAQ</div>
+          <h2 className={styles.title}>Football Rivalry Questions</h2>
+          <div className={styles.faq}>
+            {faqs.map((f) => (
+              <div key={f.q}>
+                <h3>{f.q}</h3>
+                <p>{f.a}</p>
+              </div>
+            ))}
           </div>
         </section>
       </div>
