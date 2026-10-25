@@ -20,7 +20,7 @@ export const revalidate = 86400;
 
 const title = "Popular Football Rivalries & Player Comparisons";
 const description =
-  "Browse the most searched football head-to-heads: Messi vs Ronaldo, Haaland vs Mbappé, Yamal vs Vinícius and 200 more, grouped by position, all with live stats.";
+  "Browse the most searched football head-to-heads: Messi vs Ronaldo, Messi vs Yamal, Haaland vs Mbappé and dozens more, grouped by position, all with live stats.";
 
 export const metadata: Metadata = {
   title,
@@ -44,11 +44,22 @@ const staticMatchup = (left: string, right: string): StaticMatchup => ({
 
 const staticIconic = iconicRivalries.map(([a, b]) => staticMatchup(a, b));
 
+// Same-position pairs, minus the ones already listed as iconic rivalries.
+const pairKey = (a: string, b: string) => [a, b].sort().join("|");
+const iconicKeys = new Set(iconicRivalries.map(([a, b]) => pairKey(a, b)));
+
 const staticByRole = roles.map((role) => {
-  const names = popularPlayers.filter((p) => p.role === role).map((p) => p.name);
+  const names = popularPlayers
+    .filter((p) => p.role === role && !p.rivalriesOnly)
+    .map((p) => p.name);
   return {
     role,
-    list: names.flatMap((a, i) => names.slice(i + 1).map((b) => staticMatchup(a, b))),
+    list: names.flatMap((a, i) =>
+      names
+        .slice(i + 1)
+        .filter((b) => !iconicKeys.has(pairKey(a, b)))
+        .map((b) => staticMatchup(a, b)),
+    ),
   };
 });
 
@@ -148,11 +159,8 @@ export default async function RivalriesPage() {
   const listed = iconic.length
     ? iconic.map((m) => ({ name: `${m.left.name} vs ${m.right.name}`, path: m.path }))
     : staticIconic.map((m) => ({ name: `${m.left} vs ${m.right}`, path: m.path }));
-  // Mixed-position pairs aren't listed here (they're kept out of the index),
-  // so the count covers the iconic and same-position ones on this page.
   const total =
-    matchups.filter((m) => m.kind !== "cross-role").length ||
-    staticByRole.reduce((n, r) => n + r.list.length, staticIconic.length);
+    matchups.length || staticByRole.reduce((n, r) => n + r.list.length, staticIconic.length);
 
   const jsonLd = {
     "@context": "https://schema.org",

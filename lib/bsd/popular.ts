@@ -8,7 +8,8 @@ import { hasApiKey } from "./client";
 import { canonicalSide, findPlayerBySlug } from "./matchup";
 import { searchPlayers } from "./players";
 
-// The popular players looked up in BSD, and every comparison between them.
+// The popular players looked up in BSD, and the comparisons offered to search
+// engines: the iconic rivalries and same-position pairs of headline players.
 // A name only makes it in when it leads to a real player, and each URL uses
 // the player's canonical slug, so it opens the comparison without a redirect.
 
@@ -18,7 +19,7 @@ export type PopularMatchup = {
   path: string;
   left: ResolvedPlayer;
   right: ResolvedPlayer;
-  kind: "iconic" | "same-role" | "cross-role";
+  kind: "iconic" | "same-role";
 };
 
 export const resolvePopularPlayers = cache(async (): Promise<ResolvedPlayer[]> => {
@@ -64,17 +65,19 @@ export const getPopularMatchups = cache(async (): Promise<PopularMatchup[]> => {
     if (left && right) add(left, right, "iconic");
   }
 
-  for (let i = 0; i < players.length; i++) {
-    for (let j = i + 1; j < players.length; j++) {
-      const [left, right] = [players[i], players[j]];
-      add(left, right, left.role === right.role ? "same-role" : "cross-role");
+  const headline = players.filter((p) => !p.rivalriesOnly);
+  for (let i = 0; i < headline.length; i++) {
+    for (let j = i + 1; j < headline.length; j++) {
+      const [left, right] = [headline[i], headline[j]];
+      if (left.role === right.role) add(left, right, "same-role");
     }
   }
 
   return matchups;
 });
 
-// The popular matchup between these two players, in either order.
+// The popular matchup between these two players, in either order. Anything
+// else is an ad hoc comparison, kept out of Google's index.
 export async function findPopularMatchup(a: number, b: number) {
   return (await getPopularMatchups()).find(
     (m) =>

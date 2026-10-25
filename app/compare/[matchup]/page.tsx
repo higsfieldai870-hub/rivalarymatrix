@@ -25,10 +25,14 @@ export async function generateMetadata({
   }
 
   // Popular pairs have one canonical order, so the swapped URL isn't a
-  // duplicate; mixed-position pairs stay out of the index (see sitemap.ts).
+  // duplicate. Any other pairing works for visitors but stays out of Google's
+  // index, which gets only the curated head-to-heads (lib/popular-players.ts).
+  // Other search engines, where these pages already rank, may keep them.
   const popular = await findPopularMatchup(result.left.id, result.right.id);
   const canonical = popular?.path ?? result.path;
-  const robots = popular?.kind === "cross-role" ? { index: false, follow: true } : undefined;
+  const robots = popular
+    ? undefined
+    : { index: true, follow: true, googleBot: { index: false, follow: true } };
 
   const [left, right] = [displayName(result.left), displayName(result.right)];
   const title = `${left} vs ${right}: Stats Comparison`;

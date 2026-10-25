@@ -1,11 +1,17 @@
-// The players whose head-to-heads get indexed. Every pair of them is a
-// comparison page in the sitemap; pairs in the same role rank higher, and
-// the iconic rivalries higher still. Names are full names as BSD knows them
-// (first + last name), since that is what comparison URLs are built from.
+// The comparisons offered to search engines: the iconic rivalries below, plus
+// every pair of headline players in the same position. Only these go in the
+// sitemap and on the rivalries page; any other pairing still works but is
+// kept out of Google's index. The list is deliberately short: a few dozen
+// head-to-heads people actually search for, not every possible pair.
+//
+// Names are full names as BSD knows them (first + last name), since that is
+// what comparison URLs are built from.
 
 export type Role = "forward" | "winger" | "midfielder" | "defender" | "goalkeeper";
 
-export type PopularPlayer = { name: string; role: Role };
+// rivalriesOnly: appears in an iconic rivalry, but isn't paired with the rest
+// of their position.
+export type PopularPlayer = { name: string; role: Role; rivalriesOnly?: true };
 
 export const popularPlayers: PopularPlayer[] = [
   // Forwards
@@ -15,24 +21,16 @@ export const popularPlayers: PopularPlayer[] = [
   { name: "Kylian Mbappé", role: "forward" },
   { name: "Harry Kane", role: "forward" },
   { name: "Robert Lewandowski", role: "forward" },
-  { name: "Lautaro Martínez", role: "forward" },
-  { name: "Victor Osimhen", role: "forward" },
-  { name: "Julián Álvarez", role: "forward" },
-  { name: "Alexander Isak", role: "forward" },
-  { name: "Viktor Gyökeres", role: "forward" },
   { name: "Karim Benzema", role: "forward" },
   // Wingers
   { name: "Lamine Yamal", role: "winger" },
   { name: "Vinícius Júnior", role: "winger" },
   { name: "Mohamed Salah", role: "winger" },
   { name: "Bukayo Saka", role: "winger" },
-  { name: "Michael Olise", role: "winger" },
-  { name: "Raphinha", role: "winger" },
-  { name: "Khvicha Kvaratskhelia", role: "winger" },
   { name: "Ousmane Dembélé", role: "winger" },
-  { name: "Rafael Leão", role: "winger" },
   { name: "Neymar", role: "winger" },
-  { name: "Son Heung-min", role: "winger" },
+  { name: "Raphinha", role: "winger" },
+  { name: "Michael Olise", role: "winger", rivalriesOnly: true },
   // Midfielders
   { name: "Jude Bellingham", role: "midfielder" },
   { name: "Pedri", role: "midfielder" },
@@ -40,39 +38,34 @@ export const popularPlayers: PopularPlayer[] = [
   { name: "Florian Wirtz", role: "midfielder" },
   { name: "Jamal Musiala", role: "midfielder" },
   { name: "Cole Palmer", role: "midfielder" },
-  { name: "Martin Ødegaard", role: "midfielder" },
-  { name: "Federico Valverde", role: "midfielder" },
-  { name: "Declan Rice", role: "midfielder" },
-  { name: "Bruno Fernandes", role: "midfielder" },
   { name: "Luka Modrić", role: "midfielder" },
-  { name: "Gavi", role: "midfielder" },
-  { name: "Vitinha", role: "midfielder" },
+  { name: "Bruno Fernandes", role: "midfielder", rivalriesOnly: true },
   // Defenders
   { name: "Virgil van Dijk", role: "defender" },
   { name: "William Saliba", role: "defender" },
-  { name: "Rúben Dias", role: "defender" },
   { name: "Achraf Hakimi", role: "defender" },
   { name: "Trent Alexander-Arnold", role: "defender" },
-  { name: "Antonio Rüdiger", role: "defender" },
-  { name: "Alessandro Bastoni", role: "defender" },
   // Goalkeepers
   { name: "Thibaut Courtois", role: "goalkeeper" },
   { name: "Alisson", role: "goalkeeper" },
   { name: "Gianluigi Donnarumma", role: "goalkeeper" },
-  { name: "Marc-André ter Stegen", role: "goalkeeper" },
-  { name: "Emiliano Martínez", role: "goalkeeper" },
 ];
 
 // Rivalries fans actually search for, in the order they are usually said.
+// Cross-position pairs belong here, since only same-position pairs are made
+// automatically.
 export const iconicRivalries: [string, string][] = [
   ["Lionel Messi", "Cristiano Ronaldo"],
+  ["Lionel Messi", "Lamine Yamal"],
   ["Erling Haaland", "Kylian Mbappé"],
   ["Lamine Yamal", "Kylian Mbappé"],
   ["Lamine Yamal", "Michael Olise"],
   ["Pedri", "Jude Bellingham"],
   ["Vinícius Júnior", "Lamine Yamal"],
+  ["Kylian Mbappé", "Vinícius Júnior"],
   ["Mohamed Salah", "Bukayo Saka"],
   ["Harry Kane", "Erling Haaland"],
+  ["Erling Haaland", "Mohamed Salah"],
   ["Robert Lewandowski", "Harry Kane"],
   ["Kevin De Bruyne", "Bruno Fernandes"],
   ["Florian Wirtz", "Jamal Musiala"],
@@ -88,6 +81,12 @@ export const iconicRivalries: [string, string][] = [
 const iconicNotes: Record<string, string> = {
   "Lionel Messi|Cristiano Ronaldo":
     "The debate that defined a generation. Two players who rewrote the scoring records in Spain and Europe, built in completely different ways.",
+  "Lionel Messi|Lamine Yamal":
+    "Barcelona's greatest player against the La Masia graduate already being measured against him.",
+  "Kylian Mbappé|Vinícius Júnior":
+    "Two of the fastest, most direct attackers in the world, compared on goals, dribbles and end product.",
+  "Erling Haaland|Mohamed Salah":
+    "Two of the Premier League's most prolific scorers: a pure number nine against a winger who scores like one.",
   "Erling Haaland|Kylian Mbappé":
     "Power against pace. The two forwards expected to dominate the post-Messi and Ronaldo era, both scoring at a rate few have matched.",
   "Lamine Yamal|Kylian Mbappé":
