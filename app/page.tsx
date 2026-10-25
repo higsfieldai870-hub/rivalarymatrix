@@ -261,6 +261,9 @@ export default function Home() {
               <div className={styles.sectionLabel}>FEATURED RIVALRIES</div>
               <h2 className={styles.sectionTitle}>Start With A Classic</h2>
             </div>
+            <Link href="/rivalries" className={styles.sectionLink}>
+              Browse all football rivalries <span aria-hidden>→</span>
+            </Link>
           </div>
 
           <div className={styles.rivalryGrid}>

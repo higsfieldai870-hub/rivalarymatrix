@@ -28,14 +28,48 @@
   text-transform: uppercase;
 }
 
-.empty {
-  padding: 60px 0;
+/* Written copy: intro, per-role notes and the data explainer */
+
+.intro {
+  display: grid;
+  gap: 16px;
+  max-width: 760px;
   color: var(--muted);
-  text-align: center;
+  font-size: 16px;
+  line-height: 1.7;
 }
 
-.empty a {
+.intro a {
   color: var(--green);
+}
+
+.roleIntro {
+  max-width: 760px;
+  margin: -14px 0 26px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* Name-only matchup links, used when player data is unavailable */
+
+.linkList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 4px 14px;
+  list-style: none;
+}
+
+.linkList a {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.linkList a:hover {
+  background: rgba(184, 255, 0, 0.08);
+  color: var(--white);
 }
 
 /* Matchup cards (iconic and same-position) */

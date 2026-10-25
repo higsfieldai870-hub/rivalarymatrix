@@ -302,6 +302,20 @@
   margin-bottom: 34px;
 }
 
+.sectionLink {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.sectionLink:hover {
+  color: var(--green);
+}
+
 .sectionLabel {
   color: var(--green);
   font-size: 12px;
