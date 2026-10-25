@@ -50,6 +50,49 @@
   line-height: 1.6;
 }
 
+.stories {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px 40px;
+  max-width: 1000px;
+}
+
+.stories h3,
+.method h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.stories p,
+.method p {
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.stories a {
+  color: var(--green);
+}
+
+.method {
+  display: grid;
+  gap: 22px;
+  max-width: 760px;
+  padding-left: 22px;
+}
+
+.method li::marker {
+  color: var(--green);
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .stories {
+    grid-template-columns: 1fr;
+  }
+}
+
 .faq {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

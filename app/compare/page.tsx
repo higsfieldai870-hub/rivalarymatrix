@@ -64,7 +64,7 @@ const steps = [
   },
   {
     title: "Switch the view",
-    text: "Flip between career, club and international football, then scroll down for a breakdown by competition: league, cups, Champions League and national team.",
+    text: "Flip between career, club, international, Champions League and latest-season numbers, then scroll down for a breakdown by competition.",
   },
 ];
 

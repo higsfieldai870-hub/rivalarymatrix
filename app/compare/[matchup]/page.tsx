@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import api from "@/app/components/comparison/api.module.css";
 import JsonLd from "@/app/components/JsonLd";
 import ApiComparison from "@/app/components/comparison/ApiComparison";
+import StatsGuide from "@/app/components/comparison/StatsGuide";
 import styles from "@/app/components/comparison/comparison.module.css";
 import {
   ComparisonSkeleton,
@@ -16,6 +17,7 @@ import { displayName, shortName } from "@/app/components/comparison/view-model";
 import { hasApiKey } from "@/lib/bsd/client";
 import { resolveMatchup } from "@/lib/bsd/matchup";
 import { findPopularMatchup } from "@/lib/bsd/popular";
+import { rivalryNote } from "@/lib/popular-players";
 import { absoluteUrl, openGraph, SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -113,6 +115,12 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
   }
 
   const title = `${displayName(left)} vs ${displayName(right)}`;
+
+  // Iconic rivalries get their write-up; every other pair a plain summary.
+  const popular = await findPopularMatchup(left.id, right.id);
+  const note = popular && rivalryNote(popular.left.name, popular.right.name);
+  const club = (p: typeof left) => (p.currentTeam ? ` (${p.currentTeam})` : "");
+  const intro = `${displayName(left)}${club(left)} vs ${displayName(right)}${club(right)}: career goals and assists, per-90 output, season-by-season form, scouting ratings, transfers and trophies, side by side.`;
   const person = (p: typeof left) => ({
     "@type": "Person",
     name: displayName(p),
@@ -155,6 +163,11 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
             {shortName(left)} <span>VS</span> {shortName(right)}
           </h1>
 
+          <p className={styles.heroText}>
+            {note && <>{note} </>}
+            {intro}
+          </p>
+
           <div className={api.quickPicks}>
             <Link className={api.quickPick} href={result.swapPath}>
               ⇄ Swap sides
@@ -169,6 +182,8 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
       <Suspense key={`${left.id}-${right.id}`} fallback={<ComparisonSkeleton />}>
         <ApiComparison leftId={left.id} rightId={right.id} />
       </Suspense>
+
+      <StatsGuide left={displayName(left)} right={displayName(right)} />
     </>
   );
 }

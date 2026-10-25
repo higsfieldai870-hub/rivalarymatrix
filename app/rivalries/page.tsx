@@ -5,7 +5,13 @@ import compare from "@/app/components/comparison/comparison.module.css";
 import JsonLd from "@/app/components/JsonLd";
 import { getPopularMatchups, resolvePopularPlayers, type PopularMatchup } from "@/lib/bsd/popular";
 import { matchupPath, slugify } from "@/lib/player-slug";
-import { iconicRivalries, popularPlayers, roleLabels, type Role } from "@/lib/popular-players";
+import {
+  iconicRivalries,
+  popularPlayers,
+  rivalryNote,
+  roleLabels,
+  type Role,
+} from "@/lib/popular-players";
 import { absoluteUrl, openGraph } from "@/lib/site";
 import styles from "./rivalries.module.css";
 
@@ -59,46 +65,6 @@ const roleIntros: Record<Role, string> = {
     "Goalkeeper head-to-heads focus on saves, goals conceded and match ratings, the numbers that separate a good season between the posts from a great one.",
 };
 
-// Why each iconic rivalry matters, keyed by the names in iconicRivalries.
-// Kept to what won't date: no season stats or current clubs.
-const iconicNotes: Record<string, string> = {
-  "Lionel Messi|Cristiano Ronaldo":
-    "The debate that defined a generation. Two players who rewrote the scoring records in Spain and Europe, built in completely different ways.",
-  "Erling Haaland|Kylian Mbappé":
-    "Power against pace. The two forwards expected to dominate the post-Messi and Ronaldo era, both scoring at a rate few have matched.",
-  "Lamine Yamal|Kylian Mbappé":
-    "El Clásico's sharpest edge: Barcelona's teenage prodigy against Real Madrid's established superstar.",
-  "Lamine Yamal|Michael Olise":
-    "Two left-footers on the right wing who cut inside to create, dribble for dribble and assist for assist.",
-  "Pedri|Jude Bellingham":
-    "The Clásico midfield battle: Barcelona's calm, press-resistant passer against Madrid's box-crashing goal threat.",
-  "Vinícius Júnior|Lamine Yamal":
-    "Clásico wingers on opposite flanks, both built to beat a full-back one against one.",
-  "Mohamed Salah|Bukayo Saka":
-    "Liverpool against Arsenal on the right wing: two left-footed wide forwards who carry their teams' goal threat.",
-  "Harry Kane|Erling Haaland":
-    "Complete forward against pure finisher. Kane drops deep to create; Haaland lives in the six-yard box.",
-  "Robert Lewandowski|Harry Kane":
-    "Bayern Munich's number nines, before and after. The comparison every Bayern fan has made since Kane arrived.",
-  "Kevin De Bruyne|Bruno Fernandes":
-    "The playmakers who shaped Manchester's midfields, City's and United's, measured on chances created and end product.",
-  "Florian Wirtz|Jamal Musiala":
-    "Germany's two creative jewels, the same age and position, often picked together and endlessly compared.",
-  "Cole Palmer|Bukayo Saka":
-    "England's competition for the right side: two left-footed creators chasing the same place in the starting line-up.",
-  "Lionel Messi|Neymar":
-    "Teammates at Barcelona and Paris Saint-Germain, and two of the most gifted dribblers of the modern game.",
-  "Cristiano Ronaldo|Karim Benzema":
-    "Real Madrid's partnership through its most successful era in Europe: the finisher and the forward who made space for him.",
-  "Virgil van Dijk|William Saliba":
-    "Liverpool against Arsenal at the back: two composed, quick centre-backs who rarely lose a duel.",
-  "Thibaut Courtois|Alisson":
-    "Two of the best goalkeepers of the era, both Champions League winners, compared on saves and goals conceded.",
-};
-
-const noteFor = (left: string, right: string) =>
-  iconicNotes[`${left}|${right}`] ?? iconicNotes[`${right}|${left}`];
-
 const faqs = [
   {
     q: "What makes a football rivalry?",
@@ -127,7 +93,7 @@ function MatchupTitle({ m }: { m: PopularMatchup }) {
 }
 
 function StaticCard({ m }: { m: StaticMatchup }) {
-  const note = noteFor(m.left, m.right);
+  const note = rivalryNote(m.left, m.right);
   return (
     <Link href={m.path} className={styles.card}>
       <h3>
@@ -142,7 +108,7 @@ function StaticCard({ m }: { m: StaticMatchup }) {
 }
 
 function MatchupCard({ m }: { m: PopularMatchup }) {
-  const note = m.kind === "iconic" ? noteFor(m.left.name, m.right.name) : undefined;
+  const note = m.kind === "iconic" ? rivalryNote(m.left.name, m.right.name) : undefined;
   return (
     <Link href={m.path} className={styles.card}>
       <div className={styles.faces}>
@@ -169,6 +135,14 @@ function MatchupCard({ m }: { m: PopularMatchup }) {
 export default async function RivalriesPage() {
   const [players, matchups] = await Promise.all([resolvePopularPlayers(), getPopularMatchups()]);
   const iconic = matchups.filter((m) => m.kind === "iconic");
+
+  // An inline link to a popular pair, at its canonical URL when BSD resolved it.
+  const paths = new Map(matchups.map((m) => [`${m.left.name}|${m.right.name}`, m.path]));
+  const vs = (a: string, b: string) => (
+    <Link href={paths.get(`${a}|${b}`) ?? paths.get(`${b}|${a}`) ?? staticMatchup(a, b).path}>
+      {a} vs {b}
+    </Link>
+  );
   const listed = iconic.length
     ? iconic.map((m) => ({ name: `${m.left.name} vs ${m.right.name}`, path: m.path }))
     : staticIconic.map((m) => ({ name: `${m.left} vs ${m.right}`, path: m.path }));
@@ -318,6 +292,96 @@ export default async function RivalriesPage() {
             </section>
           </>
         )}
+
+        <section className={styles.section}>
+          <div className={styles.label}>THE STORYLINES</div>
+          <h2 className={styles.title}>Where The Great Rivalries Come From</h2>
+          <div className={styles.stories}>
+            <div>
+              <h3>El Clásico: Barcelona vs Real Madrid</h3>
+              <p>
+                No fixture produces more player debates. For a decade it was {vs("Lionel Messi", "Cristiano Ronaldo")},
+                the two meeting in Clásico after Clásico. The new generation has taken over:{" "}
+                {vs("Lamine Yamal", "Kylian Mbappé")} on the flanks and up front,{" "}
+                {vs("Vinícius Júnior", "Lamine Yamal")} wing against wing, and{" "}
+                {vs("Pedri", "Jude Bellingham")} in the middle of the pitch.
+              </p>
+            </div>
+            <div>
+              <h3>The Premier League</h3>
+              <p>
+                England&apos;s top flight is built on rivalries between clubs, and the players carry
+                them on. Liverpool and Arsenal meet in {vs("Mohamed Salah", "Bukayo Saka")} and{" "}
+                {vs("Virgil van Dijk", "William Saliba")}; Manchester&apos;s midfields in{" "}
+                {vs("Kevin De Bruyne", "Bruno Fernandes")}. For the best striker in the league,
+                it&apos;s {vs("Harry Kane", "Erling Haaland")}.
+              </p>
+            </div>
+            <div>
+              <h3>Germany and the Bundesliga</h3>
+              <p>
+                Germany&apos;s brightest talents are compared constantly, none more than{" "}
+                {vs("Florian Wirtz", "Jamal Musiala")}. At Bayern Munich the question is how one
+                great number nine measures up to the next: {vs("Robert Lewandowski", "Harry Kane")}.
+              </p>
+            </div>
+            <div>
+              <h3>Teammates and generations</h3>
+              <p>
+                Some of the best debates are between players on the same side.{" "}
+                {vs("Lionel Messi", "Neymar")} shared two dressing rooms;{" "}
+                {vs("Cristiano Ronaldo", "Karim Benzema")} spent nine seasons together at Real
+                Madrid. And for the era after them, everyone asks the same thing:{" "}
+                {vs("Erling Haaland", "Kylian Mbappé")}.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.label}>THE METHOD</div>
+          <h2 className={styles.title}>How To Settle A Football Debate</h2>
+          <ol className={styles.method}>
+            <li>
+              <h3>Compare like with like</h3>
+              <p>
+                Pick players in the same position and, ideally, the same era. A winger&apos;s
+                goal tally means something different from a striker&apos;s, and football in 2012
+                was played at a different tempo from today.
+              </p>
+            </li>
+            <li>
+              <h3>Use per 90 numbers, not just totals</h3>
+              <p>
+                Totals reward whoever has played the most. Goals and assists per 90 minutes show
+                who produces more when they are actually on the pitch.
+              </p>
+            </li>
+            <li>
+              <h3>Look at peak and consistency</h3>
+              <p>
+                The season-by-season charts show how high each player&apos;s best year went and
+                how many seasons they stayed near it. A long run of good years can beat one
+                spectacular season.
+              </p>
+            </li>
+            <li>
+              <h3>Check the big stage</h3>
+              <p>
+                Switch the comparison to Champions League or international football to see who
+                delivers against the strongest opposition, not just in domestic league games.
+              </p>
+            </li>
+            <li>
+              <h3>Read the underlying numbers</h3>
+              <p>
+                Expected goals, shot conversion and key passes separate finishing from chance
+                creation, and show whether a hot streak is sustainable or running ahead of the
+                chances a player gets.
+              </p>
+            </li>
+          </ol>
+        </section>
 
         <section className={styles.section}>
           <div className={styles.label}>THE DATA</div>
