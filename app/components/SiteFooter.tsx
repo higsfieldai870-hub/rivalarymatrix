@@ -8,6 +8,13 @@ const explore = [
   { href: "/stats-guide", label: "Football Stats Explained" },
 ];
 
+const info = [
+  { href: "/about", label: "About Us" },
+  { href: "/contact", label: "Contact" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Use" },
+];
+
 export default function SiteFooter() {
   return (
     <footer className={styles.footer}>
@@ -32,6 +39,15 @@ export default function SiteFooter() {
           <nav className={styles.footerCol} aria-label="Footer">
             <h4>Explore</h4>
             {explore.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          <nav className={styles.footerCol} aria-label="Site information">
+            <h4>Info</h4>
+            {info.map((link) => (
               <Link key={link.href} href={link.href}>
                 {link.label}
               </Link>

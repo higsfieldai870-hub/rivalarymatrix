@@ -14,6 +14,9 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://rivalrymet
 
 export const absoluteUrl = (path: string) => `${SITE_URL}${path}`;
 
+// The public contact address, shown on the about, contact and legal pages.
+export const CONTACT_EMAIL = "contact@rivalrymetrics.com";
+
 // A page's `openGraph` replaces the layout's rather than merging with it,
 // so every page builds the whole block from here.
 export function openGraph(url: string, title: string, description: string) {

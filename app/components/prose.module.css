@@ -1,0 +1,81 @@
+/* Text pages: about, contact, privacy policy and terms. Colour and font
+   tokens live in app/globals.css. */
+
+.container {
+  width: 100%;
+  max-width: 820px;
+  margin: auto;
+  padding: 10px 30px 70px;
+}
+
+.updated {
+  margin-bottom: 30px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.container section + section {
+  margin-top: 36px;
+}
+
+.container h2 {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.container p,
+.container li {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.container p + p {
+  margin-top: 12px;
+}
+
+.container ul {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+  padding-left: 22px;
+  list-style: disc;
+}
+
+.container li::marker {
+  color: var(--green);
+}
+
+.container a {
+  color: var(--green);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.container strong {
+  color: var(--white);
+}
+
+.email {
+  display: inline-block;
+  margin: 6px 0 4px;
+  font-family: var(--font-display);
+  font-size: clamp(26px, 5vw, 38px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  word-break: break-all;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 16px 50px;
+  }
+
+  .container h2 {
+    font-size: 26px;
+  }
+}
