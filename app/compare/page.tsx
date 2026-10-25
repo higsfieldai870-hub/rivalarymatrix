@@ -101,7 +101,7 @@ export default function ComparePage() {
         <div className={styles.container}>
           <div className={styles.eyebrow}>
             <i className={styles.eyebrowDot} />
-            BUILD YOUR OWN • LIVE API DATA
+            BUILD YOUR OWN
           </div>
 
           <h1 className={styles.heroTitle}>

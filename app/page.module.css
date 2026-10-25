@@ -185,8 +185,21 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+.heroPicks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  max-width: 600px;
+  margin: 14px auto 0;
+}
+
+.heroPicks .ctaGhost {
+  padding-right: 18px;
+}
+
 .ctaFaces {
   display: flex;
+  flex-shrink: 0;
 }
 
 .ctaFaces img {
@@ -749,6 +762,17 @@
 
   .featuredCell {
     grid-row: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .heroPicks {
+    grid-template-columns: 1fr;
+    max-width: 340px;
+  }
+
+  .heroPicks .ctaGhost {
+    min-height: 46px;
   }
 }
 

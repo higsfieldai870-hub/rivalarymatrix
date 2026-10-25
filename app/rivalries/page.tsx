@@ -174,7 +174,7 @@ export default async function RivalriesPage() {
         <div className={compare.container}>
           <div className={compare.eyebrow}>
             <i className={compare.eyebrowDot} />
-            {total} HEAD-TO-HEADS • LIVE API DATA
+            {total} HEAD-TO-HEADS
           </div>
           <h1 className={compare.heroTitle}>
             FOOTBALL <span>RIVALRIES</span>

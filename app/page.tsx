@@ -216,14 +216,20 @@ export default function Home() {
             <Link href="/compare" className={styles.ctaPrimary}>
               Compare players <span aria-hidden>→</span>
             </Link>
-            <Link href={featured.href} className={styles.ctaGhost}>
-              <span className={styles.ctaFaces} aria-hidden>
-                {featured.photos.map((src) => (
-                  <Image key={src} src={src} alt="" width={60} height={60} sizes="26px" />
-                ))}
-              </span>
-              {featured.title}
-            </Link>
+          </div>
+
+          {/* Every featured rivalry one tap away, two by two under the main button. */}
+          <div className={styles.heroPicks}>
+            {allRivalries.map((r) => (
+              <Link key={r.href} href={r.href} className={styles.ctaGhost}>
+                <span className={styles.ctaFaces} aria-hidden>
+                  {r.photos!.map((src) => (
+                    <Image key={src} src={src} alt="" width={28} height={28} />
+                  ))}
+                </span>
+                {r.title}
+              </Link>
+            ))}
           </div>
 
           <dl className={styles.heroStats}>
