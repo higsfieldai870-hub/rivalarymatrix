@@ -15,6 +15,7 @@ import {
 import { displayName, shortName } from "@/app/components/comparison/view-model";
 import { hasApiKey } from "@/lib/bsd/client";
 import { resolveMatchup } from "@/lib/bsd/matchup";
+import { findPopularMatchup } from "@/lib/bsd/popular";
 import { absoluteUrl, openGraph, SITE_URL } from "@/lib/site";
 
 export async function generateMetadata({
@@ -26,6 +27,12 @@ export async function generateMetadata({
   if (result?.status !== "ok" || result.left.id === result.right.id) {
     return { title: "Player Comparison", robots: { index: false, follow: true } };
   }
+
+  // Popular pairs have one canonical order, so the swapped URL isn't a
+  // duplicate; mixed-position pairs stay out of the index (see sitemap.ts).
+  const popular = await findPopularMatchup(result.left.id, result.right.id);
+  const canonical = popular?.path ?? result.path;
+  const robots = popular?.kind === "cross-role" ? { index: false, follow: true } : undefined;
 
   const [left, right] = [displayName(result.left), displayName(result.right)];
   const title = `${left} vs ${right}: Stats Comparison`;
@@ -43,8 +50,9 @@ export async function generateMetadata({
       "player comparison",
     ],
     // The canonical order, even when this page was reached by another spelling.
-    alternates: { canonical: result.path },
-    openGraph: openGraph(result.path, title, description),
+    alternates: { canonical },
+    robots,
+    openGraph: openGraph(canonical, title, description),
   };
 }
 

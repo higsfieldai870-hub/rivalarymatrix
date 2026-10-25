@@ -73,3 +73,12 @@ export const getPopularMatchups = cache(async (): Promise<PopularMatchup[]> => {
 
   return matchups;
 });
+
+// The popular matchup between these two players, in either order.
+export async function findPopularMatchup(a: number, b: number) {
+  return (await getPopularMatchups()).find(
+    (m) =>
+      (m.left.player.id === a && m.right.player.id === b) ||
+      (m.left.player.id === b && m.right.player.id === a),
+  );
+}
