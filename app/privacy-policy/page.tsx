@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 // Keep this accurate to what the site actually does. If analytics, forms,
 // accounts or ads are added, this page has to change with them.
-const UPDATED = "25 October 2026";
+const UPDATED = "13 November 2026";
 
 const external = { target: "_blank", rel: "noopener noreferrer" } as const;
 
@@ -48,9 +48,9 @@ export default function PrivacyPolicyPage() {
           <h2>The short version</h2>
           <p>
             Rivalry Matrix has no accounts, no sign-ups and no forms. We don&apos;t ask for your
-            name, email address or any other personal information, the site sets no cookies of its
-            own, and we don&apos;t use analytics or tracking tools. We never sell or share data
-            about our visitors.
+            name, email address or any other personal information, and we don&apos;t run our own
+            analytics or tracking. The site is supported by advertising, and the advertising
+            companies we work with may use cookies and similar technology, explained below.
           </p>
         </section>
 
@@ -110,7 +110,14 @@ export default function PrivacyPolicyPage() {
         <section>
           <h2>Cookies and advertising</h2>
           <p>
-            Our site doesn&apos;t set cookies or store anything in your browser.
+            Rivalry Matrix itself doesn&apos;t set cookies or store anything in your browser.
+          </p>
+          <p>
+            We also show ads from Monetag, an advertising network. Its code runs on our pages, and
+            it may set cookies or use similar technology to show and measure ads, limit how often
+            you see them and prevent fraud. This can include opening an ad in a new tab or window
+            when you click on the page. Monetag processes that data under its own privacy policy;
+            we don&apos;t receive it.
           </p>
           <p>
             This site may show ads served by Google AdSense. When ads are shown, third-party

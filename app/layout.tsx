@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Inter } from "next/font/google";
+import Script from "next/script";
 import JsonLd from "./components/JsonLd";
 import FootballCursor from "./components/FootballCursor";
 import RevealObserver from "./components/RevealObserver";
@@ -86,6 +87,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 
         <FootballCursor />
         <RevealObserver />
+
+        {/* Monetag OnClick ad tag (zone 12251855). Loads after the page is interactive. */}
+        <Script src="https://al5sm.com/tag.min.js" data-zone="12251855" strategy="afterInteractive" />
       </body>
     </html>
   );
