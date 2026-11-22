@@ -10,9 +10,10 @@ import { displayName, shortName } from "@/app/components/comparison/view-model";
 import { hasApiKey } from "@/lib/bsd/client";
 import { resolveMatchup } from "@/lib/bsd/matchup";
 import { getPlayerDossier } from "@/lib/bsd/players";
-import { findPopularMatchup } from "@/lib/bsd/popular";
+import { findPopularMatchup, getPopularMatchups } from "@/lib/bsd/popular";
 import { rivalryNote } from "@/lib/popular-players";
 import { absoluteUrl, openGraph, SITE_URL } from "@/lib/site";
+import MatchupSummary from "./MatchupSummary";
 
 export async function generateMetadata({
   params,
@@ -95,6 +96,14 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
   // Iconic rivalries get their write-up; every other pair a plain summary.
   const popular = await findPopularMatchup(left.id, right.id);
   const note = popular && rivalryNote(popular.left.name, popular.right.name);
+
+  // The curated head-to-heads either player appears in, so every comparison
+  // links on to related ones instead of being a dead end.
+  const related = (await getPopularMatchups())
+    .filter((m) => m !== popular)
+    .filter((m) => [m.left.player.id, m.right.player.id].some((id) => id === left.id || id === right.id))
+    .sort((x, y) => (x.kind === y.kind ? 0 : x.kind === "iconic" ? -1 : 1))
+    .slice(0, 12);
   const club = (p: typeof left) => (p.currentTeam ? ` (${p.currentTeam})` : "");
   const intro = `${displayName(left)}${club(left)} vs ${displayName(right)}${club(right)}: career goals and assists, per-90 output, season-by-season form, scouting ratings and transfers, side by side.`;
   const person = (p: typeof left) => ({
@@ -132,7 +141,7 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
         <div className={styles.container}>
           <div className={styles.eyebrow}>
             <i className={styles.eyebrowDot} />
-            HEAD TO HEAD • LIVE API DATA
+            HEAD TO HEAD
           </div>
 
           <h1 className={`${styles.heroTitle} ${api.matchupTitle}`}>
@@ -145,7 +154,8 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
           </p>
 
           <div className={api.quickPicks}>
-            <Link className={api.quickPick} href={result.swapPath}>
+            {/* The swapped order is the same page under another URL. */}
+            <Link className={api.quickPick} href={result.swapPath} rel="nofollow">
               ⇄ Swap sides
             </Link>
             <Link className={api.quickPick} href="/compare">
@@ -156,6 +166,8 @@ export default async function MatchupPage({ params }: PageProps<"/compare/[match
       </section>
 
       <ComparisonView key={`${left.id}-${right.id}`} left={leftDossier} right={rightDossier} />
+
+      <MatchupSummary left={leftDossier} right={rightDossier} related={related} />
 
       <section className={api.guideLink}>
         <div className={styles.container}>
