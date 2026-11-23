@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import compare from "@/app/components/comparison/comparison.module.css";
 import JsonLd from "@/app/components/JsonLd";
+import { matchupFaqs, type HomeFaq } from "@/lib/bsd/home";
 import { getPopularMatchups, type PopularMatchup } from "@/lib/bsd/popular";
 import { matchupPath, slugify } from "@/lib/player-slug";
 import {
@@ -118,10 +119,12 @@ function StaticCard({ m }: { m: StaticMatchup }) {
   );
 }
 
-function MatchupCard({ m }: { m: PopularMatchup }) {
+// A box rather than one big link, since the head-to-head questions inside
+// open and close on their own.
+function MatchupCard({ m, faqs }: { m: PopularMatchup; faqs: HomeFaq[] | null | undefined }) {
   const note = m.kind === "iconic" ? rivalryNote(m.left.name, m.right.name) : undefined;
   return (
-    <Link href={m.path} className={styles.card}>
+    <article className={styles.card}>
       <div className={styles.faces}>
         {[m.left, m.right].map((p, side) => (
           <div
@@ -135,19 +138,34 @@ function MatchupCard({ m }: { m: PopularMatchup }) {
         ))}
       </div>
       <h3>
-        <MatchupTitle m={m} />
+        <Link href={m.path}>
+          <MatchupTitle m={m} />
+        </Link>
       </h3>
       {note && <p>{note}</p>}
-      <span className={styles.more}>
+      {faqs && faqs.length > 0 && (
+        <div className={styles.faqs}>
+          {faqs.map((f) => (
+            <details key={f.q}>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </div>
+      )}
+      <Link href={m.path} className={styles.more}>
         COMPARE <span aria-hidden>→</span>
-      </span>
-    </Link>
+      </Link>
+    </article>
   );
 }
 
 export default async function RivalriesPage() {
   const matchups = await getPopularMatchups();
   const iconic = matchups.filter((m) => m.kind === "iconic");
+  const faqsByPath = new Map(
+    await Promise.all(matchups.map(async (m) => [m.path, await matchupFaqs(m)] as const)),
+  );
 
   // An inline link to a popular pair, at its canonical URL when BSD resolved it.
   const paths = new Map(matchups.map((m) => [`${m.left.name}|${m.right.name}`, m.path]));
@@ -248,7 +266,7 @@ export default async function RivalriesPage() {
               <h2 className={styles.title}>Iconic Rivalries</h2>
               <div className={styles.cardGrid}>
                 {iconic.map((m) => (
-                  <MatchupCard key={m.path} m={m} />
+                  <MatchupCard key={m.path} m={m} faqs={faqsByPath.get(m.path)} />
                 ))}
               </div>
             </section>
@@ -263,7 +281,7 @@ export default async function RivalriesPage() {
                   <p className={styles.roleIntro}>{roleIntros[role]}</p>
                   <div className={styles.cardGrid}>
                     {list.map((m) => (
-                      <MatchupCard key={m.path} m={m} />
+                      <MatchupCard key={m.path} m={m} faqs={faqsByPath.get(m.path)} />
                     ))}
                   </div>
                 </section>
