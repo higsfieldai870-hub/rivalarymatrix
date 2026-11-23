@@ -16,6 +16,7 @@ Run these after a branch has been merged to `main` on GitHub:
 ssh your-user@your-vps-ip
 
 cd /var/www/rivalarymatrix
+git checkout -- package-lock.json   # drop server-side lockfile edits that block the pull
 git fetch origin
 git checkout main
 git pull origin main
@@ -35,11 +36,17 @@ To try a branch such as `aamodupdate` before merging it:
 
 ```bash
 cd /var/www/rivalarymatrix
+git checkout -- package-lock.json   # drop server-side lockfile edits that block the pull
 git fetch origin
 git checkout aamodupdate
 git pull origin aamodupdate
+git log --oneline -1                # confirm the latest commit arrived
 npm ci && npm run build && pm2 restart rivalrymetrics
 ```
+
+Use `npm ci`, never `npm install`, on the server: `npm install` rewrites
+`package-lock.json` and the next `git pull` refuses to run. Replace
+`rivalrymetrics` with the name `pm2 list` shows if yours differs.
 
 Switch back afterwards with `git checkout main && git pull`, then build and
 restart again.
