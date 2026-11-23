@@ -4,9 +4,14 @@ import Link from "next/link";
 import PickerRow from "@/app/components/comparison/PickerRow";
 import FeatureArt, { type ArtKind } from "@/app/components/home/FeatureArt";
 import { hasApiKey } from "@/lib/bsd/client";
+import { getHomeRivalries } from "@/lib/bsd/home";
 import { metricDefs, scopes } from "@/lib/player-stats";
 import { openGraph } from "@/lib/site";
 import styles from "./page.module.css";
+
+// The head-to-head answers come from live data; rebuilt hourly so a rivalry
+// missed during an API outage comes back quickly.
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -151,6 +156,89 @@ const features: Feature[] = [
   },
 ];
 
+const faqs = [
+  {
+    q: "What is Rivalry Matrix?",
+    a: "A free football statistics site that puts two players side by side: career goals and assists, per 90 numbers, season-by-season charts, advanced stats, scouting reports and transfers, all on one page.",
+  },
+  {
+    q: "How do I compare two football players?",
+    a: "Type a name into each search box on the compare page, pick the players from the suggestions and open the comparison. Every pairing gets its own page and link.",
+  },
+  {
+    q: "Is Rivalry Matrix free to use?",
+    a: "Yes. There's no sign-up and no account; the site is supported by advertising.",
+  },
+  {
+    q: "Where do the stats come from?",
+    a: "From BSD (Bzzoiro Sports Data), a football data provider. The same data powers every comparison on the site.",
+  },
+  {
+    q: "How far back do the stats go?",
+    a: "Match data covers the 2011/12 season onwards. Detailed per-match stats such as shots, passes and duels are available for most matches from the mid-2010s.",
+  },
+  {
+    q: "Why are some career totals lower than official figures?",
+    a: "Because seasons before 2011/12 aren't included. For long careers, such as Messi's and Ronaldo's, the totals here count from 2011/12 on, so they sit below the official career numbers.",
+  },
+  {
+    q: "How often are the stats updated?",
+    a: "Player stats are refreshed daily, so a comparison picks up recent matches within a day.",
+  },
+  {
+    q: "What does per 90 mean?",
+    a: "A per 90 figure divides a total by minutes played and scales it to a full match. It's the fairest way to compare a regular starter with a player who comes off the bench or has missed games.",
+  },
+  {
+    q: "What is xG (expected goals)?",
+    a: "Expected goals estimates how many goals a player's chances would produce for an average finisher, based on where and how each shot was taken. Scoring more than your xG points to good finishing.",
+  },
+  {
+    q: "What is xA (expected assists)?",
+    a: "The expected goals value of the chances a player's passes create. It measures chance creation without depending on whether a teammate finishes.",
+  },
+  {
+    q: "What is a key pass?",
+    a: "A pass that leads directly to a teammate's shot, whether or not the shot goes in. It's one of the best simple measures of creativity.",
+  },
+  {
+    q: "What is the average match rating?",
+    a: "The average of a player's per-match performance ratings, which score every action in a game. Higher is better.",
+  },
+  {
+    q: "Can I compare players in different positions?",
+    a: "Yes, any two players can be compared. Comparing players in the same position is the fairest, since a striker and a defender are judged on different numbers.",
+  },
+  {
+    q: "Can I compare goalkeepers?",
+    a: "Yes. Goalkeeper comparisons include saves, goals conceded and match ratings alongside appearances and minutes.",
+  },
+  {
+    q: "Are international matches included?",
+    a: "Yes. Switch between career, club and international numbers with the tabs at the top of any comparison.",
+  },
+  {
+    q: "Can I see Champions League stats on their own?",
+    a: "Yes. The Champions League tab limits every number in the comparison to Champions League matches, and there's a latest-season tab for current form.",
+  },
+  {
+    q: "What is in the scouting report?",
+    a: "Ratings for attacking, technical, tactical, defending and creativity, an overall ability rating out of 200, potential, scouting role and injury risk.",
+  },
+  {
+    q: "Does it show transfer history?",
+    a: "Yes. The career path section lists every club a player has played for and their transfers, with fees where they were published.",
+  },
+  {
+    q: "Can I share a comparison?",
+    a: "Yes. Every comparison has its own address, such as /compare/erling-haaland-vs-kylian-mbappe, so you can bookmark it or send it to anyone.",
+  },
+  {
+    q: "What if I can't find a player?",
+    a: "Check the spelling or try the player's surname alone. If they still don't appear, contact us with their full name and current club.",
+  },
+];
+
 const heroStats = [
   { value: `${metricDefs.length}+`, label: "METRICS" },
   { value: scopes.length, label: "FILTERS" },
@@ -175,7 +263,9 @@ function RivalryTitle({ title }: { title: string }) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const searched = await getHomeRivalries();
+
   return (
     <>
       <section className={styles.hero}>
@@ -325,6 +415,55 @@ export default function Home() {
         </div>
       </section>
 
+      {searched.length > 0 && (
+        <section className={styles.section}>
+          <div className={styles.container}>
+            <div className={styles.sectionHeader}>
+              <div>
+                <div className={styles.sectionLabel}>MOST SEARCHED</div>
+                <h2 className={styles.sectionTitle}>The Rivalries Fans Search For</h2>
+              </div>
+              <p className={styles.sectionDescription}>
+                Quick answers from our match data, which covers the 2011/12 season onwards, so
+                totals for longer careers sit below official figures. Open any rivalry for the full
+                comparison.
+              </p>
+            </div>
+
+            <div className={styles.searchedGrid}>
+              {searched.map((r) => (
+                <article key={r.href} className={styles.searchedCard}>
+                  <div className={styles.searchedHead}>
+                    <span className={styles.ctaFaces} aria-hidden>
+                      {r.photos.map((src) => (
+                        <Image key={src} src={src} alt="" width={28} height={28} />
+                      ))}
+                    </span>
+                    <h3>
+                      <Link href={r.href}>
+                        <RivalryTitle title={r.title} />
+                      </Link>
+                    </h3>
+                  </div>
+                  {r.note && <p className={styles.searchedNote}>{r.note}</p>}
+                  <div className={styles.faqList}>
+                    {r.faqs.map((f, i) => (
+                      <details key={f.q} className={styles.faqItem} open={i === 0}>
+                        <summary>{f.q}</summary>
+                        <p>{f.a}</p>
+                      </details>
+                    ))}
+                  </div>
+                  <Link href={r.href} className={styles.more}>
+                    FULL COMPARISON <span aria-hidden>→</span>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className={styles.section}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
@@ -386,6 +525,26 @@ export default function Home() {
                   </span>
                 </Link>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <div className={styles.container}>
+          <div className={styles.sectionHeader}>
+            <div>
+              <div className={styles.sectionLabel}>FAQ</div>
+              <h2 className={styles.sectionTitle}>Questions, Answered</h2>
+            </div>
+          </div>
+
+          <div className={`${styles.faqList} ${styles.faqColumns}`}>
+            {faqs.map((f) => (
+              <details key={f.q} className={styles.faqItem}>
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
             ))}
           </div>
         </div>
