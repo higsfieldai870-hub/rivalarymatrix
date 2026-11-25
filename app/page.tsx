@@ -424,9 +424,9 @@ export default async function Home() {
                 <h2 className={styles.sectionTitle}>The Rivalries Fans Search For</h2>
               </div>
               <p className={styles.sectionDescription}>
-                Quick answers from our match data, which covers the 2011/12 season onwards, so
-                totals for longer careers sit below official figures. Open any rivalry for the full
-                comparison.
+                The questions fans ask most, answered from our match data. It covers the 2011/12
+                season onwards, plus Messi&apos;s and Ronaldo&apos;s full careers, so totals for other
+                long careers sit below official figures. Open any rivalry for the full comparison.
               </p>
             </div>
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { totals, type Num, type Totals } from "@/lib/player-stats";
+import { filterLines, totals, type Num, type StatLine, type Totals } from "@/lib/player-stats";
 import { rivalryNote } from "@/lib/popular-players";
 import { getPlayerDossier } from "./players";
 import { getPopularMatchups, type PopularMatchup } from "./popular";
@@ -144,10 +144,169 @@ function goalkeeperFaqs(names: readonly [string, string], lt: Totals, rt: Totals
   ];
 }
 
+// ---------------------------------------------------------------------------
+// The longer set shown on the homepage's most searched rivalries
+// ---------------------------------------------------------------------------
+
+const list = (items: string[]) =>
+  items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+
+type Measure = {
+  label: string;
+  values: [Num, Num];
+  format: (n: number) => string;
+  lowerWins?: boolean;
+};
+
+// "Who is better?" is the question fans search most. There's no single
+// answer, so count who leads on each measure and say which ones.
+function betterFaq(names: readonly [string, string], measures: Measure[]): HomeFaq | null {
+  const [a, b] = names;
+  const leads: [string[], string[]] = [[], []];
+  for (const m of measures) {
+    const [x, y] = m.values;
+    if (x === null || y === null || m.format(x) === m.format(y)) continue;
+    const aWins = m.lowerWins ? x < y : x > y;
+    leads[aWins ? 0 : 1].push(m.label);
+  }
+  const [la, lb] = leads;
+  if (!la.length && !lb.length) return null;
+  const side = (name: string, items: string[]) =>
+    items.length ? `${name} leads on ${list(items)}` : `${name} leads on none of them`;
+  const verdict =
+    la.length === lb.length
+      ? "On our numbers it's level"
+      : `On our numbers ${la.length > lb.length ? a : b} edges it, ${Math.max(la.length, lb.length)} measures to ${Math.min(la.length, lb.length)}`;
+  return {
+    q: `Who is better, ${a} or ${b}?`,
+    a: `${verdict}. Of ${la.length + lb.length} key measures, ${side(a, la)}; ${side(b, lb)}. Which matters most is your call, and the full comparison has every stat side by side.`,
+  };
+}
+
+// Goals (or games, for goalkeepers) in one scope, when either player has
+// played in it.
+function scopeFaq(
+  names: readonly [string, string],
+  [ll, rl]: [StatLine[], StatLine[]],
+  q: string,
+  what: "goals" | "apps",
+  noun: string,
+  // For goals, how many games they came from: "Messi has 191 caps and Ronaldo 226."
+  games?: (a: string, x: string, b: string, y: string) => string,
+): HomeFaq | null {
+  const [lt, rt] = [totals(ll), totals(rl)];
+  if (lt.apps === 0 && rt.apps === 0) return null;
+  const answer = compare(
+    names,
+    [lt[what], rt[what]],
+    (w, l, wv, lv) => `${w}, with ${wv} ${noun} to ${l}'s ${lv}.`,
+    (v) => `They're level on ${v} ${noun} each.`,
+    whole,
+  );
+  const context = games ? ` ${games(names[0], whole(lt.apps), names[1], whole(rt.apps))}` : "";
+  return faq(q, answer && `${answer}${context}`);
+}
+
+function extendedFaqs(
+  names: readonly [string, string],
+  lines: [StatLine[], StatLine[]],
+  goalkeepers: boolean,
+): HomeFaq[] {
+  const [a, b] = names;
+  const [lt, rt] = [totals(lines[0]), totals(lines[1])];
+  const pick = (scope: "ucl" | "international"): [StatLine[], StatLine[]] => [
+    filterLines(lines[0], scope, null),
+    filterLines(lines[1], scope, null),
+  ];
+  const saves = (t: Totals) => (t.tracked.saves ? per90(t.tracked.saves, t.tracked.minutes) : null);
+  const conceded = (t: Totals) =>
+    t.tracked.saves ? per90(t.tracked.conceded, t.tracked.minutes) : null;
+
+  const better = betterFaq(
+    names,
+    goalkeepers
+      ? [
+          { label: "games played", values: [lt.apps, rt.apps], format: whole },
+          { label: "saves per 90", values: [saves(lt), saves(rt)], format: twoDp },
+          {
+            label: "goals conceded per 90",
+            values: [conceded(lt), conceded(rt)],
+            format: twoDp,
+            lowerWins: true,
+          },
+          { label: "average rating", values: [lt.rating, rt.rating], format: twoDp },
+        ]
+      : [
+          { label: "total goals", values: [lt.goals, rt.goals], format: whole },
+          {
+            label: "goals per 90",
+            values: [per90(lt.goals, lt.minutes), per90(rt.goals, rt.minutes)],
+            format: twoDp,
+          },
+          { label: "total assists", values: [lt.assists, rt.assists], format: whole },
+          {
+            label: "assists per 90",
+            values: [per90(lt.assists, lt.minutes), per90(rt.assists, rt.minutes)],
+            format: twoDp,
+          },
+          { label: "average rating", values: [lt.rating, rt.rating], format: twoDp },
+        ],
+  );
+
+  const core = (goalkeepers ? goalkeeperFaqs : outfieldFaqs)(names, lt, rt);
+
+  const extras = goalkeepers
+    ? [
+        scopeFaq(
+          names,
+          pick("ucl"),
+          `Who has played more Champions League games, ${a} or ${b}?`,
+          "apps",
+          "Champions League games",
+        ),
+        scopeFaq(names, pick("international"), `Who has more international caps, ${a} or ${b}?`, "apps", "caps"),
+      ]
+    : [
+        scopeFaq(
+          names,
+          pick("ucl"),
+          `Who has more Champions League goals, ${a} or ${b}?`,
+          "goals",
+          "Champions League goals",
+          (a, x, b, y) => `${a} has played ${x} Champions League games and ${b} ${y}.`,
+        ),
+        scopeFaq(
+          names,
+          pick("international"),
+          `Who has more international goals, ${a} or ${b}?`,
+          "goals",
+          "international goals",
+          (a, x, b, y) => `${a} has ${x} caps and ${b} ${y}.`,
+        ),
+        faq(
+          `Who has more goal contributions, ${a} or ${b}?`,
+          compare(
+            names,
+            [lt.goals + lt.assists, rt.goals + rt.assists],
+            (w, l, wv, lv) => `${w}, with ${wv} goals and assists combined to ${l}'s ${lv}.`,
+            (v) => `They're level on ${v} goals and assists combined.`,
+            whole,
+          ),
+        ),
+      ];
+
+  return [better, ...core, ...extras].filter((f): f is HomeFaq => f !== null).slice(0, 7);
+}
+
 // The head-to-head answers for a popular matchup, in its left/right order, or
 // null when either player's data can't be loaded right now (usually the
 // daily API quota).
-export async function matchupFaqs(m: PopularMatchup): Promise<HomeFaq[] | null> {
+// `extended` adds "who is better", Champions League, international and
+// goal-contribution questions (up to 7 in all), as the homepage shows.
+export async function matchupFaqs(
+  m: PopularMatchup,
+  { extended = false }: { extended?: boolean } = {},
+): Promise<HomeFaq[] | null> {
   try {
     const [ld, rd] = await Promise.all([
       getPlayerDossier(m.left.player.id),
@@ -155,8 +314,9 @@ export async function matchupFaqs(m: PopularMatchup): Promise<HomeFaq[] | null> 
     ]);
     if (ld.status !== "ok" || rd.status !== "ok") return null;
     const names = [shortName(m.left.name), shortName(m.right.name)] as const;
-    const build =
-      m.left.role === "goalkeeper" && m.right.role === "goalkeeper" ? goalkeeperFaqs : outfieldFaqs;
+    const goalkeepers = m.left.role === "goalkeeper" && m.right.role === "goalkeeper";
+    if (extended) return extendedFaqs(names, [ld.dossier.lines, rd.dossier.lines], goalkeepers);
+    const build = goalkeepers ? goalkeeperFaqs : outfieldFaqs;
     return build(names, totals(ld.dossier.lines), totals(rd.dossier.lines)).filter(
       (f): f is HomeFaq => f !== null,
     );
@@ -204,7 +364,7 @@ export async function getHomeRivalries(): Promise<HomeRivalry[]> {
       if (!found) return null;
       // Keep the order fans say it in, whatever order the URL uses.
       const m = found.left.name === left ? found : { ...found, left: found.right, right: found.left };
-      const faqs = await matchupFaqs(m);
+      const faqs = await matchupFaqs(m, { extended: true });
       if (!faqs) return null;
       return {
         href: m.path,
