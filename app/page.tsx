@@ -179,7 +179,7 @@ const faqs = [
   },
   {
     q: "Why are some career totals lower than official figures?",
-    a: "Because match data starts in 2011/12. For Messi and Ronaldo, earlier club seasons and international matches are added from Transfermarkt (appearances, minutes, goals and assists), so their totals cover the full career. For other players whose careers began earlier, totals count from 2011/12 on.",
+    a: "Because match data starts in 2011/12. For Messi and Ronaldo, earlier club seasons and international matches are added from Transfermarkt (appearances, minutes, goals and assists), so their totals cover the full career; Lewandowski and Modrić have their earlier club seasons added too. For other players whose careers began earlier, totals count from 2011/12 on.",
   },
   {
     q: "How often are the stats updated?",
@@ -425,7 +425,7 @@ export default async function Home() {
               </div>
               <p className={styles.sectionDescription}>
                 The questions fans ask most, answered from our match data. It covers the 2011/12
-                season onwards, plus Messi&apos;s and Ronaldo&apos;s full careers, so totals for other
+                season onwards, plus earlier seasons for Messi, Ronaldo, Lewandowski and Modrić; totals for other
                 long careers sit below official figures. Open any rivalry for the full comparison.
               </p>
             </div>

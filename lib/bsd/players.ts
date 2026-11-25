@@ -733,6 +733,7 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
         ? {
             source: history.source,
             from: Math.min(...statLines.map((l) => l.season)),
+            international: history.rows.some((r) => r.national),
           }
         : null,
   };
@@ -751,7 +752,7 @@ export const getPlayerDossier = cache(
         ? { status: "ok", dossier }
         : { status: "missing", message: `BSD has no player with id ${id}.` };
     },
-    ["bsd", "dossier", "v3"],
+    ["bsd", "dossier", "v4"],
     { revalidate: DAY },
   ),
 );

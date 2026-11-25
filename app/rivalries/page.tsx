@@ -88,7 +88,7 @@ const faqs = [
   },
   {
     q: "Are career totals complete?",
-    a: "Match data starts in the 2011/12 season. Messi's and Ronaldo's earlier club seasons and international matches are added from Transfermarkt, so their totals cover the full career. For other players whose careers began earlier, totals cover their careers from 2011/12 on and can sit below the official figures.",
+    a: "Match data starts in the 2011/12 season. Messi's and Ronaldo's earlier club seasons and international matches are added from Transfermarkt, so their totals cover the full career, and Lewandowski's and Modrić's earlier club seasons are added too. For other players whose careers began earlier, totals cover their careers from 2011/12 on and can sit below the official figures.",
   },
   {
     q: "Can I compare players who aren't listed?",
@@ -390,9 +390,9 @@ export default async function RivalriesPage() {
               has played far more minutes, and charts that show when each was at their peak.
             </p>
             <p>
-              Match data covers the 2011/12 season onwards. Earlier seasons aren&apos;t included,
-              so career totals for long-serving players, Messi and Ronaldo among them, can sit below
-              the official figures.
+              Match data covers the 2011/12 season onwards. Earlier seasons are added from
+              Transfermarkt for Messi, Ronaldo, Lewandowski and Modrić; for other long-serving
+              players, career totals can sit below the official figures.
             </p>
           </div>
         </section>

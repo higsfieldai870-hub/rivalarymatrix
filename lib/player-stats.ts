@@ -129,8 +129,9 @@ export type PlayerDossier = {
   media: MediaItem[] | null;
   warnings: string[];
   // Set when seasons before BSD's coverage were added by hand
-  // (lib/historical/pre-bsd.ts): where they came from and the first season.
-  history: { source: string; from: number } | null;
+  // (lib/historical/pre-bsd.ts): where they came from, the first season, and
+  // whether earlier international matches are included too.
+  history: { source: string; from: number; international: boolean } | null;
 };
 
 export type Side = "left" | "right";
