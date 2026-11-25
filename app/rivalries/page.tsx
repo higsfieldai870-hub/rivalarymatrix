@@ -88,7 +88,7 @@ const faqs = [
   },
   {
     q: "Are career totals complete?",
-    a: "Match data starts in the 2011/12 season. For players whose careers began earlier, such as Messi and Ronaldo, the totals here cover their careers from that season on and can sit below the official figures.",
+    a: "Match data starts in the 2011/12 season. Messi's and Ronaldo's earlier club seasons and international matches are added from Transfermarkt, so their totals cover the full career. For other players whose careers began earlier, totals cover their careers from 2011/12 on and can sit below the official figures.",
   },
   {
     q: "Can I compare players who aren't listed?",

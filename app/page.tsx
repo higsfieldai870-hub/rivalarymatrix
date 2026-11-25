@@ -179,7 +179,7 @@ const faqs = [
   },
   {
     q: "Why are some career totals lower than official figures?",
-    a: "Because seasons before 2011/12 aren't included. For long careers, such as Messi's and Ronaldo's, the totals here count from 2011/12 on, so they sit below the official career numbers.",
+    a: "Because match data starts in 2011/12. For Messi and Ronaldo, earlier club seasons and international matches are added from Transfermarkt (appearances, minutes, goals and assists), so their totals cover the full career. For other players whose careers began earlier, totals count from 2011/12 on.",
   },
   {
     q: "How often are the stats updated?",

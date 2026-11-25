@@ -296,11 +296,40 @@ export function CareerCard({ view, scopeLabel }: { view: ComparisonViewModel; sc
           <span className={api.coverageIcon} aria-hidden>
             i
           </span>
-          BSD has no per-match data before 2011/12, so earlier seasons are missing and these totals
-          are floors, not official career figures.
+          <CoverageNote view={view} />
         </p>
       </div>
     </section>
+  );
+}
+
+// Which players had seasons before 2011/12 added by hand, and from where.
+function CoverageNote({ view }: { view: ComparisonViewModel }) {
+  const added = view.names
+    .map((name, i) => ({ name, history: view.history[i] }))
+    .filter((p): p is { name: string; history: NonNullable<PlayerDossier["history"]> } => p.history !== null);
+
+  if (!added.length) {
+    return (
+      <>
+        BSD has no per-match data before 2011/12, so earlier seasons are missing and these totals
+        are floors, not official career figures.
+      </>
+    );
+  }
+
+  const sources = [...new Set(added.map((p) => p.history.source))].join(" and ");
+  const who = added.length === 2 ? "both players" : added[0].name;
+  const rest =
+    added.length === 2
+      ? ""
+      : ` ${view.names.find((n) => n !== added[0].name)}'s totals start in 2011/12, so they are floors, not official career figures.`;
+  return (
+    <>
+      Club seasons before 2011/12 and international matches before mid-2011 for {who} come from{" "}
+      {sources} and cover appearances, minutes, goals and assists only. Detailed stats and ratings
+      start in 2011/12.{rest}
+    </>
   );
 }
 

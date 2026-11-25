@@ -128,6 +128,9 @@ export type PlayerDossier = {
   injuries: Injury[] | null;
   media: MediaItem[] | null;
   warnings: string[];
+  // Set when seasons before BSD's coverage were added by hand
+  // (lib/historical/pre-bsd.ts): where they came from and the first season.
+  history: { source: string; from: number } | null;
 };
 
 export type Side = "left" | "right";

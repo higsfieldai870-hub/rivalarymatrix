@@ -40,6 +40,7 @@ export type ComparisonViewModel = {
   per90: { label: string; left: Num; right: Num }[];
   seasons: { season: number; left: SeasonRow | null; right: SeasonRow | null }[];
   competitions: [CompetitionRow[], CompetitionRow[]];
+  history: [PlayerDossier["history"], PlayerDossier["history"]];
 };
 
 const INITIAL = /^\p{Lu}\p{Ll}?\.\s+/u;
@@ -148,6 +149,7 @@ export function buildViewModel(
       right: rightBySeason.get(season) ?? null,
     })),
     competitions: [byCompetition(leftLines), byCompetition(rightLines)],
+    history: [leftDossier.history, rightDossier.history],
   };
 }
 

@@ -15,6 +15,7 @@ import type {
   TeamRef,
   Transfer,
 } from "@/lib/player-stats";
+import { historicalPlayers, type HistoricalPlayer } from "@/lib/historical/pre-bsd";
 import { bsdGet, IMAGE_BASE, isBsdError, lastKnownQuota } from "./client";
 
 // A player's dossier is assembled from their profile, season-by-season
@@ -508,6 +509,98 @@ function toMedia(item: BsdSocialItem): MediaItem {
 }
 
 // ---------------------------------------------------------------------------
+// Seasons before BSD's coverage
+// ---------------------------------------------------------------------------
+
+const plain = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/^(uefa|fifa)\s+/, "")
+    .replace(/[^a-z0-9]/g, "");
+
+function historyFor(player: BsdPlayer): HistoricalPlayer | null {
+  const name = plain(player.name);
+  return (
+    historicalPlayers.find(
+      (h) => h.birthDate === player.date_of_birth && h.rows.length > 0 && name.includes(plain(h.lastName)),
+    ) ?? null
+  );
+}
+
+// A stable negative id for a team or competition BSD doesn't list, so it
+// never collides with a real BSD id and still groups with itself.
+function localId(text: string) {
+  let hash = 0;
+  for (const char of plain(text)) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  return -(Math.abs(hash) || 1);
+}
+
+// Turns hand-entered rows into stat lines. Teams and competitions reuse the
+// BSD record of the same name where the player has one, so logos show and
+// rows group with BSD's; a season BSD already covers keeps BSD's row.
+function withHistory(lines: StatLine[], history: HistoricalPlayer | null) {
+  if (!history) return { lines, added: 0 };
+
+  const leagues = new Map(lines.map((l) => [plain(l.league.name), l.league]));
+  // "Barcelona" should find BSD's "FC Barcelona", so teams match on either
+  // name containing the other.
+  const teamFor = (name: string, national: boolean) => {
+    const key = plain(name);
+    return lines.find((l) => {
+      if (l.national !== national) return false;
+      const other = plain(l.team.name);
+      return other.length > 0 && key.length > 0 && (other.includes(key) || key.includes(other));
+    })?.team;
+  };
+  const covered = new Set(lines.map((l) => `${l.season}|${plain(l.league.name)}`));
+
+  const added: StatLine[] = history.rows
+    .filter((row) => !covered.has(`${row.season}|${plain(row.competition)}`))
+    .map((row) => ({
+      season: row.season,
+      seasonName: row.national ? String(row.season) : `${row.season}/${String((row.season + 1) % 100).padStart(2, "0")}`,
+      team: teamFor(row.team, Boolean(row.national)) ?? { id: localId(row.team), name: row.team, logo: null },
+      league: leagues.get(plain(row.competition)) ?? {
+        id: localId(row.competition),
+        name: row.competition,
+        country: row.national ? "International" : "",
+        logo: null,
+      },
+      national: Boolean(row.national),
+      tracked: false,
+      apps: row.apps,
+      minutes: row.minutes,
+      goals: row.goals,
+      assists: row.assists,
+      rating: null,
+      shots: null,
+      shotsOn: null,
+      passes: null,
+      accuratePasses: null,
+      keyPasses: null,
+      tackles: null,
+      blocks: null,
+      interceptions: null,
+      duels: null,
+      duelsWon: null,
+      dribbles: null,
+      dribblesWon: null,
+      dribbledPast: null,
+      foulsDrawn: null,
+      foulsCommitted: null,
+      yellow: null,
+      red: null,
+      saves: null,
+      conceded: null,
+      extra: {},
+    }));
+
+  return { lines: [...lines, ...added], added: added.length };
+}
+
+// ---------------------------------------------------------------------------
 // Dossier
 // ---------------------------------------------------------------------------
 
@@ -580,11 +673,16 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
       });
     }),
   );
-  const statLines = lines.filter((l): l is StatLine => l !== null);
+  const history = historyFor(player);
+  const merged = withHistory(
+    lines.filter((l): l is StatLine => l !== null),
+    history,
+  );
+  const statLines = merged.lines;
 
   // A career row whose season the API cannot name would otherwise vanish from
   // the totals without a trace, so say so instead of showing a lower number.
-  const dropped = rows.length - statLines.length;
+  const dropped = rows.length - (statLines.length - merged.added);
   const warnings = dropped
     ? [
         `${dropped} career row${dropped === 1 ? "" : "s"} could not be matched to a season, so ${
@@ -630,6 +728,13 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
     injuries: null,
     media: media ? media.map(toMedia) : null,
     warnings,
+    history:
+      history && merged.added
+        ? {
+            source: history.source,
+            from: Math.min(...statLines.map((l) => l.season)),
+          }
+        : null,
   };
 }
 
@@ -646,7 +751,7 @@ export const getPlayerDossier = cache(
         ? { status: "ok", dossier }
         : { status: "missing", message: `BSD has no player with id ${id}.` };
     },
-    ["bsd", "dossier", "v2"],
+    ["bsd", "dossier", "v3"],
     { revalidate: DAY },
   ),
 );
