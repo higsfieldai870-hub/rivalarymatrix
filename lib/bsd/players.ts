@@ -540,8 +540,11 @@ function localId(text: string) {
 // Turns hand-entered rows into stat lines. Teams and competitions reuse the
 // BSD record of the same name where the player has one, so logos show and
 // rows group with BSD's; a season BSD already covers keeps BSD's row.
+// For a complete career, every hand-entered row is used and BSD's rows are
+// kept for their detailed stats and ratings only (`detailOnly`).
 function withHistory(lines: StatLine[], history: HistoricalPlayer | null) {
   if (!history) return { lines, added: 0 };
+  const complete = Boolean(history.complete);
 
   const leagues = new Map(lines.map((l) => [plain(l.league.name), l.league]));
   // "Barcelona" should find BSD's "FC Barcelona", so teams match on either
@@ -557,10 +560,15 @@ function withHistory(lines: StatLine[], history: HistoricalPlayer | null) {
   const covered = new Set(lines.map((l) => `${l.season}|${plain(l.league.name)}`));
 
   const added: StatLine[] = history.rows
-    .filter((row) => !covered.has(`${row.season}|${plain(row.competition)}`))
+    .filter((row) => complete || !covered.has(`${row.season}|${plain(row.competition)}`))
     .map((row) => ({
       season: row.season,
-      seasonName: row.national ? String(row.season) : `${row.season}/${String((row.season + 1) % 100).padStart(2, "0")}`,
+      // Backfilled internationals are by calendar year; complete careers use
+      // July-to-June seasons throughout.
+      seasonName:
+        row.national && !complete
+          ? String(row.season)
+          : `${row.season}/${String((row.season + 1) % 100).padStart(2, "0")}`,
       team: teamFor(row.team, Boolean(row.national)) ?? { id: localId(row.team), name: row.team, logo: null },
       league: leagues.get(plain(row.competition)) ?? {
         id: localId(row.competition),
@@ -597,7 +605,8 @@ function withHistory(lines: StatLine[], history: HistoricalPlayer | null) {
       extra: {},
     }));
 
-  return { lines: [...lines, ...added], added: added.length };
+  const kept = complete ? lines.map((l) => ({ ...l, detailOnly: true })) : lines;
+  return { lines: [...kept, ...added], added: added.length };
 }
 
 // ---------------------------------------------------------------------------
@@ -734,6 +743,7 @@ async function buildDossier(id: number): Promise<PlayerDossier | null> {
             source: history.source,
             from: Math.min(...statLines.map((l) => l.season)),
             international: history.rows.some((r) => r.national),
+            complete: Boolean(history.complete),
           }
         : null,
   };
@@ -752,7 +762,7 @@ export const getPlayerDossier = cache(
         ? { status: "ok", dossier }
         : { status: "missing", message: `BSD has no player with id ${id}.` };
     },
-    ["bsd", "dossier", "v4"],
+    ["bsd", "dossier", "v5"],
     { revalidate: DAY },
   ),
 );

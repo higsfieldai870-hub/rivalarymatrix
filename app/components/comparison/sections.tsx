@@ -318,30 +318,29 @@ function CoverageNote({ view }: { view: ComparisonViewModel }) {
     );
   }
 
-  const sources = [...new Set(added.map((p) => p.history.source))].join(" and ");
-  const who = added.length === 2 ? "both players" : added[0].name;
-  const allInternational = added.every((p) => p.history.international);
-  const clubOnly = added.filter((p) => !p.history.international).map((p) => p.name);
+  const both = (names: string[]) => (names.length === 2 ? "both players" : names[0]);
+  const sourceOf = (group: typeof added) =>
+    [...new Set(group.map((p) => p.history.source))].join(" and ");
+
+  // Whole careers from one source; BSD only adds detail and ratings.
+  const complete = added.filter((p) => p.history.complete);
+  // Earlier seasons added on top of BSD's.
+  const backfilled = added.filter((p) => !p.history.complete);
+  const clubOnly = backfilled.filter((p) => !p.history.international).map((p) => p.name);
   const missing = view.names.find((n) => !added.some((p) => p.name === n));
-  const rest = [
-    clubOnly.length && !allInternational
-      ? `${clubOnly.join(" and ")}'s international matches before 2011 aren't included yet.`
+
+  const sentences = [
+    complete.length
+      ? `Appearances, goals, assists and minutes for ${both(complete.map((p) => p.name))} cover the whole career, club and international, from ${sourceOf(complete)}.`
       : "",
+    backfilled.length
+      ? `Earlier seasons for ${both(backfilled.map((p) => p.name))} come from ${sourceOf(backfilled)} and cover appearances, minutes, goals and assists only.`
+      : "",
+    "Detailed stats and ratings come from match data starting in 2011/12.",
+    clubOnly.length ? `${clubOnly.join(" and ")}'s international matches before 2011 aren't included yet.` : "",
     missing ? `${missing}'s totals start in 2011/12, so they are floors, not official career figures.` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-  const what = allInternational
-    ? "Club seasons before 2011/12 and international matches before mid-2011"
-    : added.some((p) => p.history.international)
-      ? "Earlier club seasons and, where available, international matches"
-      : "Club seasons before 2011/12";
-  return (
-    <>
-      {what} for {who} come from {sources} and cover appearances, minutes, goals and assists only.
-      Detailed stats and ratings start in 2011/12.{rest && ` ${rest}`}
-    </>
-  );
+  ];
+  return <>{sentences.filter(Boolean).join(" ")}</>;
 }
 
 function ChartCard({

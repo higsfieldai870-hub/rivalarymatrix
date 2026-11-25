@@ -38,6 +38,10 @@ export type StatLine = {
   league: { id: number; name: string; country: string; logo: string | null };
   national: boolean;
   tracked: boolean;
+  // Kept only for its rating and detailed statistics: another source
+  // supplies this player's appearances, minutes, goals and assists, so they
+  // don't count here (see `complete` in lib/historical/pre-bsd.ts).
+  detailOnly?: boolean;
 
   apps: number;
   minutes: number;
@@ -129,9 +133,10 @@ export type PlayerDossier = {
   media: MediaItem[] | null;
   warnings: string[];
   // Set when seasons before BSD's coverage were added by hand
-  // (lib/historical/pre-bsd.ts): where they came from, the first season, and
-  // whether earlier international matches are included too.
-  history: { source: string; from: number; international: boolean } | null;
+  // (lib/historical/pre-bsd.ts): where they came from, the first season,
+  // whether earlier international matches are included too, and whether the
+  // whole career comes from that source.
+  history: { source: string; from: number; international: boolean; complete: boolean } | null;
 };
 
 export type Side = "left" | "right";
@@ -232,10 +237,11 @@ export function totals(lines: StatLine[], types: Record<string, StatType> = {}):
     [...trackedKeys, "apps", "minutes", "goals", "assists"].map((k) => [k, 0]),
   ) as TrackedTotals;
 
+  const counted = lines.filter((l) => !l.detailOnly);
   const t: Totals = {
-    rows: lines.length,
-    seasons: new Set(lines.map((l) => l.season)).size,
-    competitions: new Set(lines.map((l) => l.league.id)).size,
+    rows: counted.length,
+    seasons: new Set(counted.map((l) => l.season)).size,
+    competitions: new Set(counted.map((l) => l.league.id)).size,
     apps: 0,
     minutes: 0,
     goals: 0,
@@ -251,10 +257,12 @@ export function totals(lines: StatLine[], types: Record<string, StatType> = {}):
   const averageWeights: Record<string, number> = {};
 
   for (const l of lines) {
-    t.apps += l.apps;
-    t.minutes += l.minutes;
-    t.goals += l.goals;
-    t.assists += l.assists;
+    if (!l.detailOnly) {
+      t.apps += l.apps;
+      t.minutes += l.minutes;
+      t.goals += l.goals;
+      t.assists += l.assists;
+    }
 
     if (l.rating !== null) {
       const weight = l.minutes || l.apps;
@@ -407,10 +415,13 @@ export function bySeason(lines: StatLine[]): Map<number, SeasonRow> {
 
   const rows = new Map<number, SeasonRow>();
   for (const [season, group] of groups) {
+    const counted = group.filter((l) => !l.detailOnly);
+    // A season known only from detail rows has no appearances to show.
+    if (!counted.length) continue;
     const t = totals(group);
     rows.set(season, {
       season,
-      clubs: [...new Set(group.map((l) => l.team.name))],
+      clubs: [...new Set(counted.map((l) => l.team.name))],
       apps: t.apps,
       goals: t.goals,
       assists: t.assists,
@@ -436,6 +447,7 @@ export type CompetitionRow = {
 export function byCompetition(lines: StatLine[]): CompetitionRow[] {
   const rows = new Map<number, CompetitionRow & { seasonSet: Set<number> }>();
   for (const l of lines) {
+    if (l.detailOnly) continue;
     const row = rows.get(l.league.id) ?? {
       ...l.league,
       seasons: 0,
