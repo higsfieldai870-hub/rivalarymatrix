@@ -950,7 +950,11 @@ function ScoutingColumn({ dossier, side }: { dossier: PlayerDossier; side: Side 
   const facts = s
     ? [
         { label: "Scouting role", value: s.role },
-        { label: "Ability rating", value: s.rating !== null ? `${s.rating} / 200` : null },
+        {
+          label: "Ability rating",
+          // Out of 100 now; BSD once rated ability out of 200.
+          value: s.rating !== null ? `${s.rating} / ${s.rating <= 100 ? 100 : 200}` : null,
+        },
         { label: "Potential", value: s.potential },
         { label: "Injury risk", value: s.injuryRisk },
       ].filter((f) => f.value)
@@ -999,9 +1003,19 @@ function ScoutingColumn({ dossier, side }: { dossier: PlayerDossier; side: Side 
   );
 }
 
+// The scale scouting scores are out of: BSD has used 0-20 and 0-100, so take
+// whichever fits every score, rather than drawing points off the chart.
+function scoutingScale(values: number[]) {
+  const top = Math.max(0, ...values);
+  if (top <= 20) return 20;
+  if (top <= 100) return 100;
+  return Math.ceil(top / 10) * 10;
+}
+
 export function ScoutingReport({ players, names }: { players: Pair; names: [string, string] }) {
   const [a, b] = players.map((d) => d.scouting);
   const axes = SCOUTING_AXES.filter(({ key }) => a?.[key] != null && b?.[key] != null);
+  const scale = scoutingScale(axes.flatMap((x) => [a![x.key]!, b![x.key]!]));
 
   return (
     <Section id="scouting">
@@ -1018,10 +1032,10 @@ export function ScoutingReport({ players, names }: { players: Pair; names: [stri
                   { label: names[1], data: axes.map((x) => b![x.key]) },
                 ]}
                 min={0}
-                max={20}
+                max={scale}
                 tooltips={[
-                  axes.map((x) => `${a![x.key]} / 20`),
-                  axes.map((x) => `${b![x.key]} / 20`),
+                  axes.map((x) => `${a![x.key]} / ${scale}`),
+                  axes.map((x) => `${b![x.key]} / ${scale}`),
                 ]}
                 ariaLabel={`Radar chart of scouting attributes for ${names[0]} and ${names[1]}.`}
               />
